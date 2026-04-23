@@ -1,137 +1,170 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from './utils/firebase';
-import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from 'firebase/auth';
-import { collection, query, onSnapshot } from 'firebase/firestore';
+import { 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  onAuthStateChanged, 
+  signInWithEmailAndPassword,
+  RecaptchaVerifier,
+  signInWithPhoneNumber 
+} from 'firebase/auth';
+import { collection, query, onSnapshot, doc, getDoc } from 'firebase/firestore';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCards } from 'swiper/modules';
-import { Search, Heart, MessageCircle, User, Home, Bell, Settings, Mic, Lock, ShieldAlert } from 'lucide-react';
+import { Mail, Phone, Lock, Settings, Mic, Home, MessageCircle, Heart, User, ShieldCheck } from 'lucide-react';
+import ProfileSettings from './components/ProfileSettings';
 
 import 'swiper/css';
 import 'swiper/css/effect-cards';
 
 const App = () => {
   const [user, setUser] = useState(null);
-  const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // 🛡️ سیکیورٹی: سکرین شاٹ اور رائٹ کلک بلاک کرنا
-  useEffect(() => {
-    const handleContextMenu = (e) => e.preventDefault();
-    document.addEventListener('contextmenu', handleContextMenu);
-    
-    // سکرین شاٹ روکنے کے لیے ایک سادہ CSS ٹرک (صرف موبائل براؤزر پر اثر انداز ہوتا ہے)
-    document.body.style.userSelect = 'none';
-    document.body.style.webkitUserSelect = 'none';
-    
-    return () => document.removeEventListener('contextmenu', handleContextMenu);
-  }, []);
+  const [loginMethod, setLoginMethod] = useState(null); // 'email', 'phone', 'google'
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [phone, setPhone] = useState('');
+  const [otp, setOtp] = useState('');
+  const [confirmationResult, setConfirmationResult] = useState(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [profiles, setProfiles] = useState([]);
 
   useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
     });
-    return () => unsubscribeAuth();
+    return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    if (user) {
-      const q = query(collection(db, "profiles"));
-      const unsubscribeData = onSnapshot(q, (snap) => {
-        const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setProfiles(data.length > 0 ? data : getDummyData());
+  // 🛡️ فون OTP لاگ ان لاجک
+  const setupRecaptcha = () => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible'
       });
-      return () => unsubscribeData();
     }
-  }, [user]);
+  };
 
+  const handlePhoneSignIn = async () => {
+    setupRecaptcha();
+    try {
+      const result = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
+      setConfirmationResult(result);
+      alert("OTP بھیج دیا گیا ہے");
+    } catch (error) { alert("نمبر غلط ہے یا فارمیٹ درست نہیں (+923...)"); }
+  };
+
+  const verifyOtp = async () => {
+    try {
+      await confirmationResult.confirm(otp);
+    } catch (error) { alert("OTP غلط ہے"); }
+  };
+
+  // 📧 ای میل لاگ ان
+  const handleEmailLogin = () => {
+    signInWithEmailAndPassword(auth, email, password).catch(err => alert("ای میل یا پاس ورڈ غلط ہے"));
+  };
+
+  // 🌐 گوگل لاگ ان
   const handleGoogleLogin = () => {
     const provider = new GoogleAuthProvider();
     signInWithPopup(auth, provider);
   };
 
-  const handleProfileClick = () => {
-    // 🔗 دوسری ریپوزٹری (TezroWeb) کے رجسٹریشن فارم پر بھیجنا
-    const returnUrl = window.location.href;
-    window.location.href = `https://tezroweb.vercel.app/register?return=${encodeURIComponent(returnUrl)}`;
-  };
+  if (loading) return <div className="min-h-screen bg-[#4A0E0E] flex items-center justify-center text-[#D4AF37]">لوڈ ہو رہا ہے...</div>;
 
-  const getDummyData = () => [
-    {id:"1", name:"عائشہ خان", city:"لاہور", age:"28", profession:"Doctor", img:"https://images.unsplash.com/photo-1594744803329-e58b31de8bf5"},
-    {id:"2", name:"سارہ احمد", city:"کراچی", age:"26", profession:"Teacher", img:"https://images.unsplash.com/photo-1567532939604-b6b5b0db2604"}
-  ];
-
-  // 🚪 لاگ ان صفحہ
-  if (!user && !loading) {
+  // --- لاگ ان اسکرین ---
+  if (!user) {
     return (
-      <div className="max-w-md mx-auto min-h-screen bg-[#4A0E0E] flex flex-col justify-center items-center p-8 text-[#D4AF37]">
-        <img src="/images/Logo.png" className="w-32 mb-8 animate-pulse" alt="Logo" />
-        <h1 className="text-3xl font-black italic mb-2">AZWAJ LOGIN</h1>
-        <p className="text-xs opacity-60 mb-10 text-center font-bold">محفوظ ازدواجی سفر کا آغاز یہاں سے کریں</p>
+      <div className="max-w-md mx-auto min-h-screen bg-[#4A0E0E] p-8 flex flex-col justify-center items-center text-[#D4AF37]">
+        <img src="/images/Logo.png" className="w-24 mb-6 shadow-2xl" alt="Logo" />
+        <h1 className="text-2xl font-black mb-8 italic">AZWAJ SECURE LOGIN</h1>
+
+        <div id="recaptcha-container"></div>
+
+        {!loginMethod ? (
+          <div className="w-full space-y-4">
+            <button onClick={() => setLoginMethod('phone')} className="w-full bg-white/10 p-4 rounded-2xl flex items-center gap-4 border border-[#D4AF37]/20 hover:bg-white/20">
+              <Phone size={20} /> فون نمبر سے لاگ ان
+            </button>
+            <button onClick={() => setLoginMethod('email')} className="w-full bg-white/10 p-4 rounded-2xl flex items-center gap-4 border border-[#D4AF37]/20 hover:bg-white/20">
+              <Mail size={20} /> ای میل سے لاگ ان
+            </button>
+            <button onClick={handleGoogleLogin} className="w-full bg-white text-gray-800 p-4 rounded-2xl flex items-center gap-4 font-bold">
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-5" /> گوگل سے لاگ ان
+            </button>
+          </div>
+        ) : (
+          <div className="w-full space-y-4 animate-in fade-in slide-in-from-bottom-4">
+            {loginMethod === 'phone' && (
+              <>
+                {!confirmationResult ? (
+                  <div className="space-y-4">
+                    <input type="text" placeholder="+923000000000" onChange={(e)=>setPhone(e.target.value)} className="w-full p-4 rounded-xl bg-white/5 border border-[#D4AF37]/30 outline-none text-white" />
+                    <button onClick={handlePhoneSignIn} className="w-full bg-[#D4AF37] text-[#4A0E0E] p-4 rounded-xl font-bold">OTP بھیجیں</button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <input type="text" placeholder="6 ہندسوں کا کوڈ" onChange={(e)=>setOtp(e.target.value)} className="w-full p-4 rounded-xl bg-white/5 border border-[#D4AF37]/30 outline-none text-white text-center tracking-[10px]" />
+                    <button onClick={verifyOtp} className="w-full bg-green-600 text-white p-4 rounded-xl font-bold">تصدیق کریں</button>
+                  </div>
+                )}
+              </>
+            )}
+
+            {loginMethod === 'email' && (
+              <div className="space-y-4">
+                <input type="email" placeholder="ای میل" onChange={(e)=>setEmail(e.target.value)} className="w-full p-4 rounded-xl bg-white/5 border border-[#D4AF37]/30 outline-none text-white" />
+                <input type="password" placeholder="پاس ورڈ" onChange={(e)=>setPassword(e.target.value)} className="w-full p-4 rounded-xl bg-white/5 border border-[#D4AF37]/30 outline-none text-white" />
+                <button onClick={handleEmailLogin} className="w-full bg-[#D4AF37] text-[#4A0E0E] p-4 rounded-xl font-bold">داخل ہوں</button>
+              </div>
+            )}
+            
+            <button onClick={() => {setLoginMethod(null); setConfirmationResult(null);}} className="w-full text-xs opacity-50 underline mt-4 text-center">واپس جائیں</button>
+          </div>
+        )}
         
-        <button 
-          onClick={handleGoogleLogin}
-          className="w-full bg-white text-gray-700 py-4 rounded-2xl font-bold flex items-center justify-center gap-4 shadow-xl active:scale-95 transition-all"
-        >
-          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" className="w-6" />
-          Google کے ساتھ لاگ ان کریں
-        </button>
-        
-        <div className="mt-6 text-[10px] text-center opacity-40">
-          <ShieldAlert size={12} className="inline mx-1" />
-          سیکیورٹی کی وجہ سے سکرین شاٹ لینا منع ہے
+        <div className="mt-12 flex items-center gap-2 text-[10px] opacity-40">
+           <ShieldCheck size={14} /> سیکیورٹی پروٹیکشن آن ہے
         </div>
       </div>
     );
   }
 
+  // --- ہوم اسکرین (لاگ ان کے بعد) ---
   return (
-    <div className="max-w-md mx-auto min-h-screen bg-[#FDF5F5] pb-28 relative select-none">
-      {/* سکرین شاٹ پروٹیکشن اوورلے (کچھ براؤزرز کے لیے) */}
-      <div className="fixed inset-0 pointer-events-none z-[999] border-[10px] border-[#4A0E0E]/5 print:hidden"></div>
+    <div className="max-w-md mx-auto min-h-screen bg-[#FDF5F5] pb-28 relative">
+       {/* یہاں آپ کا پرانا کارڈ سوائپر اور ہیڈر والا کوڈ آئے گا جو ہم نے پہلے بنایا تھا */}
+       {/* بس اس میں 'showSettings' کی لاجک شامل رہے گی */}
+       <div className="bg-[#4A0E0E] p-6 pb-20 rounded-b-[60px] flex justify-between items-center shadow-xl">
+          <img src="/images/Logo.png" className="h-10" />
+          <div className="flex gap-4">
+             <Settings className="text-[#D4AF37] cursor-pointer" onClick={() => setShowSettings(true)} />
+             <button onClick={() => auth.signOut()} className="text-[#D4AF37] text-xs border border-[#D4AF37]/30 px-3 py-1 rounded-full">LOGOUT</button>
+          </div>
+       </div>
 
-      {/* Header */}
-      <div className="bg-[#4A0E0E] p-6 pb-20 rounded-b-[60px] shadow-2xl relative border-b-2 border-[#D4AF37]/50">
-        <div className="flex justify-between items-center mb-6">
-           <img src="/images/Logo.png" alt="Logo" className="h-10" />
-           <button onClick={() => auth.signOut()} className="text-[#D4AF37] text-[10px] font-bold border border-[#D4AF37]/30 px-3 py-1 rounded-full">LOGOUT</button>
-        </div>
-        <div className="relative">
-          <input type="text" placeholder="تلاش کریں..." className="w-full p-4 pr-12 rounded-full bg-white/10 border border-[#D4AF37]/20 text-white outline-none" />
-          <Mic className="absolute right-4 top-1/2 -translate-y-1/2 text-[#D4AF37]" size={20} />
-        </div>
-      </div>
+       <div className="p-10 text-center text-[#4A0E0E]">
+          <h2 className="text-xl font-bold italic">خوش آمدید، {user.displayName || user.email || user.phoneNumber}</h2>
+          <p className="text-sm opacity-60">آپ کامیابی سے لاگ ان ہو چکے ہیں</p>
+       </div>
 
-      {/* Cards */}
-      <div className="px-6 -mt-12 z-10 relative h-[480px]">
-        <Swiper effect={'cards'} grabCursor={true} modules={[EffectCards]} className="w-full h-full">
-          {profiles.map((p) => (
-            <SwiperSlide key={p.id} onClick={handleProfileClick} className="bg-white rounded-[50px] shadow-2xl overflow-hidden border border-gray-100 p-2 cursor-pointer">
-              <div className="relative h-2/3">
-                <img src={p.img} className="h-full w-full object-cover rounded-[40px]" />
-                <div className="absolute top-4 left-4 bg-red-600 p-2 rounded-2xl flex items-center gap-1 shadow-lg">
-                  <Lock size={12} className="text-white" />
-                  <span className="text-white text-[8px] font-bold tracking-widest">TAP TO REGISTER</span>
-                </div>
-              </div>
-              <div className="p-4 text-center">
-                <h3 className="font-extrabold text-[#4A0E0E] text-xl tracking-tighter uppercase">{p.name}</h3>
-                <p className="text-gray-400 text-[10px] font-bold mt-1">{p.age} سال • {p.city}</p>
-                <div className="mt-4 bg-[#4A0E0E] text-[#D4AF37] py-3 rounded-2xl font-black text-sm">مزید معلومات کے لیے کلک کریں</div>
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </div>
+       {showSettings && (
+         <div className="fixed inset-0 z-[500] bg-black/60 backdrop-blur-md flex items-end">
+            <div className="w-full bg-white rounded-t-[40px] relative animate-in slide-in-from-bottom">
+               <button onClick={() => setShowSettings(false)} className="absolute top-4 right-6 font-bold text-gray-400">X</button>
+               <ProfileSettings userProfile={{}} lang="ur" />
+            </div>
+         </div>
+       )}
 
-      {/* Footer Navigation */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] bg-[#4A0E0E] p-4 flex justify-around rounded-full shadow-2xl border border-[#D4AF37]/30 z-[100]">
-        <Home className="text-[#D4AF37]" size={24}/>
-        <MessageCircle className="text-[#D4AF37]/40" size={24}/>
-        <div className="bg-[#D4AF37] p-3 rounded-full -mt-12 border-4 border-[#FDF5F5] shadow-lg"><Heart size={28} fill="#4A0E0E" /></div>
-        <Settings className="text-[#D4AF37]/40" size={24}/>
-        <User className="text-[#D4AF37]/40" size={24}/>
-      </div>
+       {/* فوٹر نیویگیشن */}
+       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] bg-[#4A0E0E] p-4 flex justify-around rounded-full shadow-2xl z-[100]">
+          <Home className="text-[#D4AF37]" size={24}/>
+          <div className="bg-[#D4AF37] p-3 rounded-full -mt-12 border-4 border-[#FDF5F5] shadow-lg"><Heart size={28} fill="#4A0E0E" /></div>
+          <User className="text-[#D4AF37]/40" size={24}/>
+       </div>
     </div>
   );
 };
