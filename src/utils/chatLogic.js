@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { db } from '../utils/firebase';
 import { collection, addDoc, query, where, onSnapshot, orderBy } from 'firebase/firestore';
 
 export const startPrivateChat = async (user1, user2) => {

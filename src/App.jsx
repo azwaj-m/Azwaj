@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Menu, Bell, Search, SlidersHorizontal, Heart, X, Star, ShieldCheck, Lock, Users, MessageSquareHeart, Home, UserCircle } from 'lucide-react';
+import { Menu, Bell, Search, SlidersHorizontal, Heart, X, Star, ShieldCheck, Lock, Users, MessageSquareHeart, Home, UserCircle, CheckCircle } from 'lucide-react';
 
 // Swiper Components & Styles
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -152,7 +152,7 @@ const App = () => {
           { Icon: UserCircle, label: "Profile" }
         ].map((item, i) => item.isCenter ? (
           // سینٹر والا بڑا دل
-          <div key={i} className="bg-white/10 p-1.5 rounded-full -mt-10 border-4 border-[#FDF5F5] shadow-lg">
+          <div key={i} className="bg-white/10 p-1.5 rounded-full -mt-12 scale-110 border-4 border-[#FDF5F5] shadow-lg">
             <div className="bg-gradient-to-b from-[#D4AF37] to-[#B6912A] p-3 rounded-full">
               <Heart size={24} fill="#4A0E0E" stroke="#4A0E0E" />
             </div>

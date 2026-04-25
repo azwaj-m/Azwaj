@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
-import { getDatabase } from "firebase/database";
+import { getFirestore } from "firebase/database";
 import { getStorage } from "firebase/storage";
 
 const firebaseConfig = {
@@ -17,5 +17,5 @@ const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider(); // گوگل لاگ ان کے لیے
-export const db = getDatabase(app); // ریئل ٹائم چیٹ کے لیے
+export const db = getFirestore(app); // ریئل ٹائم چیٹ کے لیے
 export const storage = getStorage(app); // تصاویر اپلوڈ کرنے کے لیے
