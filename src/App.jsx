@@ -33,14 +33,14 @@ const App = () => {
     <div className="max-w-md mx-auto min-h-screen bg-[#FDF5F5] relative overflow-hidden font-sans" dir="ltr">
       
       {/* Royal Header Section */}
-      <header className="bg-gradient-to-b from-[#4A0E0E] to-[#631212] pt-12 pb-24 rounded-b-[70px] relative z-10 shadow-2xl border-b-[6px] border-[#D4AF37]/50">
+      <header className="bg-gradient-to-b from-[#4A0E0E] to-[#631212] pt-12 pb-24 rounded-b-[70px] relative z-40 shadow-2xl border-b-[6px] border-[#D4AF37]/50">
         <div className="flex justify-between items-center px-6 mb-8 relative z-20 text-[#D4AF37]">
           <Menu className="cursor-pointer active:scale-95 transition-transform" onClick={() => setIsDrawerOpen(true)} />
           <Bell className="cursor-pointer active:scale-95 transition-transform" />
         </div>
         
         <div className="flex flex-col items-center relative z-20 mb-6">
-          <img src="/images/Logo.png" alt="Azwaj Royal Logo" className="h-20 mb-3" />
+          <img src="images/Logo.png" alt="Azwaj Royal Logo" className="h-20 mb-3" />
           <h1 className="text-[#D4AF37] text-4xl font-serif font-black tracking-tighter italic uppercase">Azwaj</h1>
           <div className="w-32 h-[2px] bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent mt-3 shadow-xl"></div>
         </div>
@@ -90,6 +90,5 @@ const App = () => {
   );
 };
 
-const UserCircle = ({ size, ...props }) => <User size={size} {...props} />
 
 export default App;

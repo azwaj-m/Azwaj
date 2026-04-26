@@ -38,9 +38,9 @@ const Discover = ({ profiles, rotation, setRotation }) => {
           className="w-[290px] h-[370px]"
           onPan={(swiper) => setRotation(swiper.translate * 0.1)}
         >
-          {[...profiles, ...Array(10).fill(profiles[0])].slice(0, 10).map((user, i) => (
+          {[...profiles, ...Array(10).fill(null)].slice(0, 10).map((user, i) => (
             <SwiperSlide key={user.id} className="rounded-[40px] bg-white border-[6px] border-white shadow-2xl overflow-hidden relative group active:border-[#D4AF37]">
-              <img src={user.profileImg} className="w-full h-full object-cover group-active:scale-105 transition-transform duration-500" alt={user.fullName} />
+              <img src={user.profileImg || "https://via.placeholder.com/400"} className="w-full h-full object-cover group-active:scale-105 transition-transform duration-500" alt={user.fullName} />
               
               {/* Premium Gradient Overlay with Right-to-Left text */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 p-6 flex flex-col justify-end text-white text-right" dir="rtl">
