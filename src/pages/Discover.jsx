@@ -38,7 +38,7 @@ const Discover = ({ profiles, rotation, setRotation }) => {
           className="w-[290px] h-[370px]"
           onPan={(swiper) => setRotation(swiper.translate * 0.1)}
         >
-          {profiles.map(user => (
+          {profiles.slice(0, 10).map(user => (
             <SwiperSlide key={user.id} className="rounded-[40px] bg-white border-[6px] border-white shadow-2xl overflow-hidden relative group active:border-[#D4AF37]">
               <img src={user.profileImg} className="w-full h-full object-cover group-active:scale-105 transition-transform duration-500" alt={user.fullName} />
               
