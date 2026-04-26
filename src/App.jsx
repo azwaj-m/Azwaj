@@ -26,7 +26,7 @@ const App = () => {
     { key: 'discover', label: 'Discover', icon: Home },
     { key: 'matches', label: 'Matches', icon: Heart },
     { key: 'messages', label: 'Messages', icon: MessageSquareHeart },
-    { key: 'profile', label: 'Profile', icon: UserCircle },
+    { key: 'profile', label: 'Profile', icon: User },
   ];
 
   return (
@@ -40,7 +40,7 @@ const App = () => {
         </div>
         
         <div className="flex flex-col items-center relative z-20 mb-6">
-          <img src="/logo_new.png" alt="Azwaj Royal Logo" className="h-20 mb-3" />
+          <img src="/images/Logo.png" alt="Azwaj Royal Logo" className="h-20 mb-3" />
           <h1 className="text-[#D4AF37] text-4xl font-serif font-black tracking-tighter italic uppercase">Azwaj</h1>
           <div className="w-32 h-[2px] bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent mt-3 shadow-xl"></div>
         </div>

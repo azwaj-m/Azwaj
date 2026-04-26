@@ -12,10 +12,10 @@ const Discover = ({ profiles, rotation, setRotation }) => {
     <div className="w-full flex flex-col items-center">
       
       {/* Circular Swiper - Positioned above the card stack */}
-      <div className="relative w-full h-[80px] mb-6 flex justify-center items-end opacity-70 pointer-events-none z-0">
-        {profiles.slice(0, 5).map((p, i) => {
-          const angle = (i / (5 - 1)) * Math.PI; // Half circle logic
-          const x = Math.cos(angle) * 170;
+      <div className="relative w-full h-[120px] mb-6 flex justify-center items-end opacity-100 pointer-events-none z-10">
+        {profiles.slice(0, 10).map((p, i) => {
+          const angle = (i /  (10 - 1)) * Math.PI; // Half circle logic
+          const x = Math.cos(angle) * 140;
           const y = Math.sin(angle) * 70;
           return (
             <motion.div 
@@ -81,7 +81,7 @@ const Discover = ({ profiles, rotation, setRotation }) => {
       </div>
 
       {/* Feature Icons Banner - Correctmodular placement */}
-      <div className="grid grid-cols-4 gap-2 bg-white/80 backdrop-blur-sm mx-6 p-5 rounded-3xl border border-gray-100 shadow-xl mb-12 relative z-0 w-[90%]">
+      <div className="grid grid-cols-4 gap-2 bg-white/80 backdrop-blur-sm mx-6 p-5 rounded-3xl border border-gray-100 shadow-xl mb-12 relative z-10 w-[90%]">
         {[
           { icon: <CheckCircle size={22} />, label: "Verified Profiles" },
           { icon: "🔒", label: "Private & Secure" },
