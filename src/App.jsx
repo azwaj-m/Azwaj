@@ -69,7 +69,7 @@ const App = () => {
       </header>
 
       <main className="relative -mt-16 px-6 z-30">
-        <Swiper effect={'cards'} grabCursor={true} modules={[EffectCards]} className="w-[300px] h-[400px]">
+        <Swiper effect={'cards'} grabCursor={true} modules={[EffectCards]} className="w-[260px] h-[320px]">
           {profiles.map(user => (
             <SwiperSlide key={user.id} className="rounded-[40px] bg-white border-8 border-white shadow-2xl overflow-hidden relative">
               <img src={user.img} className="w-full h-full object-cover" alt="" />
