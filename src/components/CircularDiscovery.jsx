@@ -14,10 +14,16 @@ const CircularDiscovery = ({ profiles, onSelect }) => {
             <motion.div
               key={profile.id}
               onClick={() => onSelect(profile)}
-              className="absolute w-14 h-14 rounded-full border-2 border-[#4A0E0E] overflow-hidden cursor-pointer"
+                <motion.div
+                  key={profile.id}
+                  initial={{ scale: 0.8 }}
+                  whileHover={{ scale: 1.2 }}
+                  onClick={() => onSelect(profile)}
+                  className="absolute w-12 h-12 rounded-full border-2 border-[#D4AF37] overflow-hidden cursor-pointer shadow-lg transition-all duration-300"
+                  style={{ top: "50%", left: "50%", transform: `rotate(${angle}deg) translate(140px) rotate(-${angle}deg)` }}
               style={{
                 top: '50%', left: '50%',
-                transform: `rotate(${angle}deg) translate(150px) rotate(-${angle}deg) translateX(-50%) translateY(-50%)`
+                transform: `rotate(${angle}deg) translate(120px) rotate(-${angle}deg) translateX(-50%) translateY(-50%)`
               }}
             >
               <img src={profile.profileImg} className="w-full h-full object-cover" />

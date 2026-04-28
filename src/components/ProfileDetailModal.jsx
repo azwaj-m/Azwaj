@@ -41,6 +41,8 @@ const ProfileDetailModal = ({ profile, onClose }) => {
               <InfoItem icon={Briefcase} label="پیشہ/تعلیم" value={profile.profession || profile.education || 'Masters in Psychology'} />
               <InfoItem icon={MapPin} label="شہر" value={profile.city || 'Lahore, Pakistan'} />
               <InfoItem icon={Moon} label="مذہب" value={profile.religion || 'Muslim'} />
+              <InfoItem icon={User} label="تاریخ پیدائش" value={profile.dob || "1999-01-01"} />
+              <InfoItem icon={User} label="مذہب/مسلک" value={profile.religion || "Sunni / Shia"} />
             </div>
 
             <div className="mt-8 border-t pt-6 text-right">

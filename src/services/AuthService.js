@@ -16,6 +16,8 @@ export const handleAuthAndProfile = async (file) => {
   }
 
   await setDoc(doc(db, "users", user.uid), {
+    dob: file.dob || "",
+    religion: file.religion || "Not Specified",
     uid: user.uid,
     displayName: user.displayName,
     email: user.email,

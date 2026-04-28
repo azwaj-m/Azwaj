@@ -63,7 +63,7 @@ const App = () => {
                           <Heart fill="currentColor" size={28} />
                         </button>
                     )}
-                    <button onClick={() => setActiveTab(item.key)} className={`flex flex-col items-center gap-1 ${isActive ? 'text-[#4A0E0E]' : 'text-gray-400'} group`}>
+                    <button onClick={() => {setActiveTab(item.key); console.log("Navigating to:", item.key)}} className={`flex flex-col items-center gap-1 ${isActive ? 'text-[#4A0E0E]' : 'text-gray-400'} group`}>
                       <Icon className={isActive ? '' : 'group-hover:text-[#4A0E0E]/70'}/>
                       <span className="text-[10px] font-bold">{item.label}</span>
                     </button>

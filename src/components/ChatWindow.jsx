@@ -20,7 +20,7 @@ const ChatWindow = ({ chatId, senderId, recipientName, onClose }) => {
     await addDoc(collection(db, "chats", chatId, "messages"), {
       text: newMessage,
       senderId,
-      time: serverTimestamp()
+      time: serverTimestamp(), status: "sent"
     });
     setNewMessage('');
   };
