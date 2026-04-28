@@ -1,100 +1,71 @@
 import React from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCards } from 'swiper/modules';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, X, Star, CheckCircle, SlidersHorizontal } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Heart, X, Star, CheckCircle } from 'lucide-react';
 
 import 'swiper/css';
 import 'swiper/css/effect-cards';
 
-const Discover = ({ profiles, rotation, setRotation }) => {
+const Discover = ({ profiles = [], rotation = 0, setRotation }) => {
+  // صرف وہ پروفائلز نکالیں جو واقعی موجود ہیں
+  const validProfiles = profiles.filter(p => p && p.id);
+
   return (
     <div className="w-full flex flex-col items-center">
-      
-      {/* Circular Swiper - Positioned above the card stack */}
+      {/* Upper Circles */}
       <div className="relative w-full h-[120px] mb-6 flex justify-center items-end opacity-100 pointer-events-none z-10">
-        {(profiles || []).slice(0, 10).map((p, i) => {
-          const angle = (i /  (10 - 1)) * Math.PI; // Half circle logic
+        {validProfiles.slice(0, 6).map((p, i) => {
+          const angle = (i / (Math.max(1, validProfiles.length - 1))) * Math.PI;
           const x = Math.cos(angle) * 140;
           const y = Math.sin(angle) * 70;
           return (
-            <motion.div 
-              key={p.id}
+            <motion.div
+              key={`circle-${p.id}`}
               className="absolute w-14 h-14 rounded-full border-[3px] border-[#D4AF37]/60 overflow-hidden shadow-lg bg-white"
-              style={{ transform: `translate(${x}px, ${-y}px) rotate(-${rotation}deg)` }}
+              animate={{ x, y: -y, rotate: -rotation }}
             >
-              <img src={p.profileImg} className="w-full h-full object-cover" alt="" />
+              <img src={p.profileImg || "/images/Logo.png"} className="w-full h-full object-cover" alt="" />
             </motion.div>
           );
         })}
       </div>
 
-      {/* Main Tinder-style Card Stack */}
-      <main className="relative z-20 flex justify-center mb-10 group">
-        <Swiper 
-          effect={'cards'} cardsEffect={{ slideShadows: false, rotate: true, perSlideOffset: 8, perSlideRotate: 2 }} 
-          grabCursor={true} 
-          modules={[EffectCards]} 
+      {/* Card Stack */}
+      <main className="relative z-20 flex justify-center mb-10">
+        <Swiper
+          effect={'cards'}
+          grabCursor={true}
+          modules={[EffectCards]}
           className="w-[290px] h-[370px]"
-          onPan={(swiper) => setRotation(swiper.translate * 0.1)}
+          onProgress={(s) => setRotation && setRotation(s.progress * 10)}
         >
-          {[...profiles, ...Array(10).fill(null)].slice(0, 10).map((user, i) => (
-            <SwiperSlide key={user.id} className="rounded-[40px] bg-white border-[6px] border-white shadow-2xl overflow-hidden relative group active:border-[#D4AF37]">
-              <img src={user.profileImg || "https://via.placeholder.com/400"} className="w-full h-full object-cover group-active:scale-105 transition-transform duration-500" alt={user.fullName} />
-              
-              {/* Premium Gradient Overlay with Right-to-Left text */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 p-6 flex flex-col justify-end text-white text-right" dir="rtl">
+          {validProfiles.length > 0 ? validProfiles.map((user) => (
+            <SwiperSlide key={user.id} className="rounded-[40px] bg-white border-[6px] border-white shadow-2xl overflow-hidden relative">
+              <img src={user.profileImg || "https://via.placeholder.com/400"} className="w-full h-full object-cover" alt="" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 p-6 flex flex-col justify-end text-white text-right" dir="rtl">
                 <div className="flex items-center gap-2 mb-2">
-                   {user.verificationStatus && <CheckCircle size={18} className="text-yellow-500 fill-yellow-500/20" />}
+                   {user.verificationStatus && <CheckCircle size={18} className="text-yellow-500 fill-yellow-500" />}
                    <h3 className="text-2xl font-bold">{user.fullName}, {user.age || '24'}</h3>
                 </div>
-                <p className="text-sm opacity-90">{user.education || 'Masters in Psychology'}</p>
-                <p className="text-xs opacity-80">{user.city || 'Lahore, Pakistan'} • {user.religion || 'Muslim'}</p>
+                <p className="text-sm opacity-90">{user.profession || user.education || 'Member'}</p>
+                <p className="text-xs opacity-80">{user.city || 'Pakistan'}</p>
               </div>
             </SwiperSlide>
-          ))}
+          )) : (
+            <SwiperSlide className="rounded-[40px] bg-gray-100 flex items-center justify-center text-gray-400">
+              ڈیٹا لوڈ ہو رہا ہے...
+            </SwiperSlide>
+          )}
         </Swiper>
       </main>
 
-      {/* High-End Action Buttons (Pass, Like, Super Like) */}
+      {/* Buttons */}
       <div className="flex items-center gap-8 mb-12 z-30">
-        <div className="flex flex-col items-center gap-2.5">
-          <button className="w-16 h-16 rounded-full bg-white shadow-2xl flex items-center justify-center text-red-600 border border-gray-100 active:scale-90 active:bg-gray-50 transition-all">
-            <X size={32} strokeWidth={3} />
-          </button>
-          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Pass</span>
-        </div>
-
-        <div className="flex flex-col items-center gap-2.5">
-          <button className="w-22 h-22 rounded-full bg-gradient-to-br from-[#4A0E0E] to-[#631212] shadow-[0_15px_40px_rgba(74,14,14,0.4)] flex items-center justify-center text-[#D4AF37] border-4 border-[#D4AF37]/30 active:scale-95 transition-transform">
-            <Heart size={44} fill="currentColor" />
-          </button>
-          <span className="text-[10px] font-bold text-[#4A0E0E] uppercase tracking-widest">Like</span>
-        </div>
-
-        <div className="flex flex-col items-center gap-2.5">
-          <button className="w-16 h-16 rounded-full bg-white shadow-2xl flex items-center justify-center text-yellow-600 border border-gray-100 active:scale-90 active:bg-gray-50 transition-all">
-            <Star size={32} fill="currentColor" />
-          </button>
-          <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Super Like</span>
-        </div>
+          <button className="w-16 h-16 rounded-full bg-white shadow-xl flex items-center justify-center text-red-500"><X size={32}/></button>
+          <button className="w-20 h-20 rounded-full bg-[#4A0E0E] shadow-2xl flex items-center justify-center text-[#D4AF37]"><Heart size={40} fill="currentColor"/></button>
+          <button className="w-16 h-16 rounded-full bg-white shadow-xl flex items-center justify-center text-yellow-500"><Star size={32} fill="currentColor"/></button>
       </div>
-
-      {/* Feature Icons Banner - Correctmodular placement */}
-      <div className="grid grid-cols-4 gap-2 bg-white/80 backdrop-blur-sm mx-6 p-5 rounded-3xl border border-gray-100 shadow-xl mb-12 relative z-10 w-[90%]">
-        {[
-          { icon: <CheckCircle size={22} />, label: "Verified Profiles" },
-          { icon: "🔒", label: "Private & Secure" },
-          { icon: <Heart size={22} />, label: "Serious Matches" },
-          { icon: "💬", label: "Meaningful Connections" }
-        ].map((item, idx) => (
-          <div key={idx} className={`flex flex-col items-center text-center ${idx !== 0 ? 'border-l border-gray-200 pl-2' : ''}`}>
-            <div className="text-yellow-600 mb-1">{item.icon}</div>
-            <span className="text-[8px] font-bold leading-tight">{item.label}</span>
-          </div>
-        ))}
-      </div>
-
     </div>
   );
 };
