@@ -1,11 +1,11 @@
 
 import { db } from './firebase';
 
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore';
 
 
 
-// 1. ڈیٹا پاتھ سیکیورٹی (Chat ID Generator)
+// 1. محفوظ چیٹ آئی ڈی جنریٹر
 
 export const getSecureChatId = (uid1, uid2) => {
 
@@ -15,21 +15,9 @@ export const getSecureChatId = (uid1, uid2) => {
 
 
 
-// 2. ایکسیس کنٹرول (Frontend check before calling Firebase)
+// 2. مواد کی فلٹرنگ (Bad words / Contact prevention)
 
-export const validateAccess = async (userId) => {
-
-  const userDoc = await getDoc(doc(db, "users", userId));
-
-  return userDoc.exists() && userDoc.data().isBlocked !== true;
-
-};
-
-
-
-// 3. مواد کی فلٹرنگ (Bad words prevention)
-
-const BANNED_KEYWORDS = ['spam', 'abuse', 'contact', '@', '+92'];
+const BANNED_KEYWORDS = ['spam', 'abuse', 'contact', '@', '+92', '03'];
 
 export const sanitizeMessage = (text) => {
 
