@@ -4,21 +4,19 @@ import { EffectCards } from 'swiper/modules';
 import CircularDiscovery from '../components/CircularDiscovery';
 import { X, Heart } from 'lucide-react';
 
-// Swiper CSS لازمی ہے ورنہ کارڈز بکھر جائیں گے
-import 'swiper/css';
-import 'swiper/css/effect-cards';
-
 const Discover = ({ profiles, onProfileClick }) => {
   const [rotation, setRotation] = useState(0);
 
   const handleSlideChange = (swiper) => {
-    setRotation(swiper.activeIndex * (360 / 12));
+    // ہر کارڈ بدلنے پر دائرہ 30 ڈگری گھومے گا
+    setRotation(swiper.activeIndex * 30);
   };
 
   return (
-    <div className="flex flex-col items-center px-6 relative min-h-[600px]">
-      {/* 1. کارڈ اسٹیک (Front Layer) */}
-      <div className="w-full max-w-[300px] h-[400px] z-20 mt-10">
+    <div className="flex flex-col items-center justify-start min-h-screen relative overflow-hidden pt-10">
+      
+      {/* کارڈ اسٹیک - یہ تصویر کے مطابق اوپر رہے گا */}
+      <div className="w-[320px] h-[450px] z-20">
         <Swiper
           effect={'cards'}
           grabCursor={true}
@@ -27,10 +25,10 @@ const Discover = ({ profiles, onProfileClick }) => {
           className="h-full"
         >
           {profiles.slice(0, 10).map((p) => (
-            <SwiperSlide key={p.id} className="rounded-[40px] shadow-2xl overflow-hidden bg-white border border-white/20">
-              <div className="relative h-full" onClick={() => onProfileClick(p)}>
-                <img src={p.profileImg} className="w-full h-full object-cover" alt="" />
-                <div className="absolute bottom-0 w-full p-6 bg-gradient-to-t from-[#4A0E0E] via-black/20 to-transparent text-white text-right" dir="rtl">
+            <SwiperSlide key={p.id} className="bg-white rounded-[40px]">
+              <div className="relative h-full w-full" onClick={() => onProfileClick(p)}>
+                <img src={p.profileImg} className="w-full h-full object-cover" alt={p.fullName} />
+                <div className="absolute bottom-0 w-full p-6 bg-gradient-to-t from-black/80 to-transparent text-white text-right">
                   <h3 className="text-2xl font-bold">{p.fullName}, {p.age}</h3>
                   <p className="text-sm opacity-80">{p.profession}</p>
                 </div>
@@ -40,19 +38,17 @@ const Discover = ({ profiles, onProfileClick }) => {
         </Swiper>
       </div>
 
-      {/* 2. سرکلر ڈسکوری (Back Layer - Positioned exactly like the image) */}
-      <div className="absolute top-[280px] z-10 w-full flex justify-center pointer-events-none">
-        <div className="pointer-events-auto">
-           <CircularDiscovery profiles={profiles} rotation={rotation} onSelect={onProfileClick} />
-        </div>
+      {/* سرکلر ڈسکوری - یہ کارڈ کے پیچھے آدھا چھپا ہوا ہوگا */}
+      <div className="absolute top-[320px] left-0 right-0 flex justify-center z-10 scale-110">
+        <CircularDiscovery profiles={profiles} rotation={rotation} onSelect={onProfileClick} />
       </div>
 
-      {/* 3. ایکشن بٹنز */}
-      <div className="fixed bottom-28 flex items-center gap-8 z-30">
-        <button className="p-4 bg-white rounded-full shadow-xl text-red-500 border border-gray-100 active:scale-90 transition-transform">
-          <X size={30} />
+      {/* کنٹرول بٹنز - تصویر کے مطابق پوزیشن */}
+      <div className="fixed bottom-28 flex gap-8 z-30">
+        <button className="p-4 bg-white rounded-full shadow-lg text-red-500 active:scale-90 transition-transform border">
+          <X size={32} />
         </button>
-        <button className="p-[18px] bg-gradient-to-br from-[#4A0E0E] to-[#631212] rounded-full shadow-2xl text-[#D4AF37] active:scale-90 transition-transform">
+        <button className="p-4 bg-[#4A0E0E] rounded-full shadow-lg text-[#D4AF37] active:scale-90 transition-transform border-2 border-[#D4AF37]">
           <Heart size={32} fill="currentColor" />
         </button>
       </div>

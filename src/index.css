@@ -2,15 +2,18 @@
 @tailwind components;
 @tailwind utilities;
 
-.no-scrollbar::-webkit-scrollbar { display: none; }
-.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+/* Swiper Core Styles */
+@import 'swiper/css';
+@import 'swiper/css/effect-cards';
 
 body {
   background-color: #FDF5F5;
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
+  margin: 0;
+  overflow-x: hidden;
 }
 
+/* کارڈز کو تصویر کے مطابق گول اور پریمیم بنانے کے لیے */
 .swiper-slide {
-  transition: transform 0.3s ease;
+  border-radius: 40px ! from-[#4A0E0E];
+  box-shadow: 0 20px 40px rgba(0,0,0,0.3);
 }
