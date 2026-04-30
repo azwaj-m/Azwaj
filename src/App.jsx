@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { initialProfiles } from './utils/seedData';
 import Discover from './pages/Discover';
 import ProfileSettings from './components/ProfileSettings';
+import EditProfileForm from './components/EditProfileForm';
 import ProfileDetailModal from './components/ProfileDetailModal';
 import { Bell, Menu, Compass, Heart, MessageCircle, User, Search, SlidersHorizontal } from 'lucide-react';
 
@@ -10,8 +11,11 @@ const App = () => {
   const [profiles] = useState(initialProfiles);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+  
+  // پروفائل ایڈٹ کرنے کی سٹیٹ
+  const [isEditing, setIsEditing] = useState(false);
 
-  // سرچ فلٹرنگ لاجک: یہ نام، شہر اور پیشے کی بنیاد پر ڈیٹا فلٹر کرتا ہے
+  // سرچ فلٹرنگ لاجک
   const filteredProfiles = useMemo(() => {
     if (!searchQuery.trim()) return profiles;
     const query = searchQuery.toLowerCase();
@@ -28,29 +32,33 @@ const App = () => {
 
   return (
     <div className="max-w-md mx-auto min-h-screen bg-[#FDF5F5] relative overflow-x-hidden font-sans pb-24 text-right" dir="rtl">
-      {/* ہیڈر بیک گراؤنڈ */}
-      <div className="absolute top-0 left-0 right-0 h-[260px] bg-gradient-to-b from-[#4A0E0E] to-[#631212] rounded-b-[50px] shadow-2xl z-0"></div>
       
-      <header className="relative z-10 p-6 flex items-center justify-between">
-        <Menu className="text-white cursor-pointer" />
-        <h1 className="text-4xl font-serif font-bold text-[#D4AF37] drop-shadow-md">Azwaj</h1>
-        <Bell className="text-white cursor-pointer" />
-      </header>
+      {/* ہیڈر اور سرچ بار صرف 'discover' ٹیب پر دکھائیں یا ضرورت کے مطابق ایڈجسٹ کریں */}
+      {activeTab === 'discover' && (
+        <>
+          <div className="absolute top-0 left-0 right-0 h-[260px] bg-gradient-to-b from-[#4A0E0E] to-[#631212] rounded-b-[50px] shadow-2xl z-0"></div>
+          
+          <header className="relative z-10 p-6 flex items-center justify-between">
+            <Menu className="text-white cursor-pointer" />
+            <h1 className="text-4xl font-serif font-bold text-[#D4AF37] drop-shadow-md">Azwaj</h1>
+            <Bell className="text-white cursor-pointer" />
+          </header>
 
-      {/* سرچ بار سیکشن */}
-      <div className="relative z-10 px-6 mt-2 mb-10">
-        <div className="relative flex items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-5 py-3.5 shadow-lg focus-within:bg-white/20 transition-all">
-          <Search size={20} className="text-yellow-500" />
-          <input
-            type="text"
-            placeholder="تلاش کریں (نام، شہر یا پیشہ)..."
-            className="bg-transparent w-full px-3 outline-none text-white placeholder-gray-300 text-sm text-right"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          <SlidersHorizontal size={20} className="text-yellow-500 cursor-pointer" />
-        </div>
-      </div>
+          <div className="relative z-10 px-6 mt-2 mb-10">
+            <div className="relative flex items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-5 py-3.5 shadow-lg focus-within:bg-white/20 transition-all">
+              <Search size={20} className="text-yellow-500" />
+              <input
+                type="text"
+                placeholder="تلاش کریں (نام، شہر یا پیشہ)..."
+                className="bg-transparent w-full px-3 outline-none text-white placeholder-gray-300 text-sm text-right"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <SlidersHorizontal size={20} className="text-yellow-500 cursor-pointer" />
+            </div>
+          </div>
+        </>
+      )}
 
       <main className="relative z-10">
         {activeTab === 'discover' && (
@@ -60,33 +68,53 @@ const App = () => {
             onLike={handleLike} 
           />
         )}
-        {activeTab === 'profile' && <ProfileSettings />}
+
+        {/* پروفائل ٹیب لاجک: یہاں Settings اور Edit Form کے درمیان سوئچ ہوگا */}
+        {activeTab === 'profile' && (
+          !isEditing ? (
+            <ProfileSettings onEdit={() => setIsEditing(true)} />
+          ) : (
+            <EditProfileForm 
+              onSave={(data) => {
+                console.log("Saving data:", data);
+                setIsEditing(false);
+              }} 
+              onCancel={() => setIsEditing(false)} 
+            />
+          )
+        )}
+
         {(activeTab === 'matches' || activeTab === 'messages') && (
-          <div className="text-center p-10 text-[#4A0E0E]/60">یہ سیکشن جلد فعال ہو جائے گا</div>
+          <div className="text-center p-10 text-[#4A0E0E]/60 mt-20">یہ سیکشن جلد فعال ہو جائے گا</div>
         )}
       </main>
 
-      {/* نیویگیشن بار */}
-      <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-md border-t flex justify-around p-4 z-50 rounded-t-3xl shadow-xl">
-        {[
-          { key: 'discover', label: 'ڈسکور', icon: Compass },
-          { key: 'matches', label: 'میچز', icon: Heart },
-          { key: 'messages', label: 'پیغامات', icon: MessageCircle },
-          { key: 'profile', label: 'پروفائل', icon: User },
-        ].map((item) => {
-          const Icon = item.icon;
-          return (
-            <button 
-              key={item.key} 
-              onClick={() => setActiveTab(item.key)} 
-              className={`flex flex-col items-center gap-1 transition-colors ${activeTab === item.key ? 'text-[#4A0E0E]' : 'text-gray-400'}`}
-            >
-              <Icon size={24} />
-              <span className="text-[10px] font-bold">{item.label}</span>
-            </button>
-          );
-        })}
-      </nav>
+      {/* نیویگیشن بار - جب ایڈٹ فارم کھلا ہو تو اسے چھپا سکتے ہیں */}
+      {!isEditing && (
+        <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-md border-t flex justify-around p-4 z-50 rounded-t-3xl shadow-xl">
+          {[
+            { key: 'discover', label: 'ڈسکور', icon: Compass },
+            { key: 'matches', label: 'میچز', icon: Heart },
+            { key: 'messages', label: 'پیغامات', icon: MessageCircle },
+            { key: 'profile', label: 'پروفائل', icon: User },
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <button 
+                key={item.key} 
+                onClick={() => {
+                  setActiveTab(item.key);
+                  setIsEditing(false); // ٹیب بدلنے پر ایڈٹ موڈ ختم کر دیں
+                }} 
+                className={`flex flex-col items-center gap-1 transition-colors ${activeTab === item.key ? 'text-[#4A0E0E]' : 'text-gray-400'}`}
+              >
+                <Icon size={24} />
+                <span className="text-[10px] font-bold">{item.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      )}
 
       {/* پروفائل ڈیٹیل ماڈل */}
       {selectedProfile && (

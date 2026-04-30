@@ -1,10 +1,10 @@
 import React from 'react';
 import { 
   User, ShieldCheck, Lock, Bell, Heart, EyeOff, 
-  UserMinus, HelpCircle, Info, ChevronLeft, Camera, Settings, LogOut 
+  UserMinus, HelpCircle, Info, ChevronLeft, Camera, LogOut 
 } from 'lucide-react';
 
-const ProfileSettings = () => {
+const ProfileSettings = ({ onEdit }) => {
   const settingsGroups = [
     {
       title: "ACCOUNT SETTINGS",
@@ -34,7 +34,6 @@ const ProfileSettings = () => {
 
   return (
     <div className="pb-10" dir="ltr">
-      {/* پروفائل ہیڈر */}
       <div className="px-6 flex flex-col items-center">
         <div className="relative">
           <div className="w-28 h-28 rounded-full border-4 border-white shadow-xl overflow-hidden bg-gray-200">
@@ -50,8 +49,6 @@ const ProfileSettings = () => {
             Aisha Khan <ShieldCheck size={20} className="text-yellow-600 fill-yellow-600/20" />
           </h2>
           <p className="text-sm text-gray-500 font-medium">28 • Doctor • Lahore</p>
-          <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-wider">Member ID: AZM123456</p>
-          
           <div className="mt-3 inline-flex items-center gap-2 bg-green-50 px-3 py-1 rounded-full border border-green-100">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
             <span className="text-[10px] font-bold text-green-700 uppercase">Profile 100% Complete</span>
@@ -59,10 +56,8 @@ const ProfileSettings = () => {
         </div>
       </div>
 
-      {/* پریمیم کارڈ */}
       <div className="px-6 mt-8">
         <div className="bg-gradient-to-r from-[#4A0E0E] to-[#8B1A1A] rounded-3xl p-5 shadow-xl relative overflow-hidden group">
-          <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700"></div>
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-[#D4AF37] rounded-2xl flex items-center justify-center shadow-lg transform -rotate-6">
@@ -70,17 +65,16 @@ const ProfileSettings = () => {
               </div>
               <div>
                 <h4 className="text-white font-bold">Upgrade to Premium</h4>
-                <p className="text-[#D4AF37] text-[10px] mt-0.5">Unlock exclusive features and filters</p>
+                <p className="text-[#D4AF37] text-[10px] mt-0.5">Unlock exclusive features</p>
               </div>
             </div>
-            <button className="bg-[#D4AF37] text-[#4A0E0E] px-4 py-2 rounded-xl text-xs font-black shadow-lg hover:bg-white transition-colors uppercase">
+            <button className="bg-[#D4AF37] text-[#4A0E0E] px-4 py-2 rounded-xl text-xs font-black shadow-lg uppercase">
               Upgrade
             </button>
           </div>
         </div>
       </div>
 
-      {/* سیٹنگز لسٹ */}
       <div className="mt-8 space-y-8 px-6">
         {settingsGroups.map((group, gIdx) => (
           <div key={gIdx}>
@@ -89,7 +83,8 @@ const ProfileSettings = () => {
               {group.items.map((item, iIdx) => (
                 <div 
                   key={iIdx} 
-                  className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors ${iIdx !== group.items.length - 1 ? 'border-bottom border-gray-50' : ''}`}
+                  onClick={() => item.label === "Personal Information" && onEdit && onEdit()}
+                  className={`flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50 transition-colors ${iIdx !== group.items.length - 1 ? 'border-b border-gray-50' : ''}`}
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-2xl bg-[#FDF5F5] flex items-center justify-center text-[#4A0E0E]">
@@ -111,9 +106,8 @@ const ProfileSettings = () => {
         ))}
       </div>
 
-      {/* لاگ آؤٹ بٹن */}
       <div className="px-6 mt-10 mb-6">
-        <button className="w-full py-4 flex items-center justify-center gap-3 text-red-600 font-bold bg-white rounded-2xl border border-red-50 shadow-sm active:scale-95 transition-all">
+        <button className="w-full py-4 flex items-center justify-center gap-3 text-red-600 font-bold bg-white rounded-2xl border border-red-50 shadow-sm">
           <LogOut size={20} />
           <span>Logout</span>
         </button>
