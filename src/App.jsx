@@ -10,23 +10,25 @@ const App = () => {
   const [profiles] = useState(initialProfiles);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  
+
+  // سرچ فلٹرنگ لاجک: یہ نام، شہر اور پیشے کی بنیاد پر ڈیٹا فلٹر کرتا ہے
   const filteredProfiles = useMemo(() => {
     if (!searchQuery.trim()) return profiles;
+    const query = searchQuery.toLowerCase();
     return profiles.filter(p =>
-      p.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.profession.toLowerCase().includes(searchQuery.toLowerCase())
+      p.fullName.toLowerCase().includes(query) ||
+      p.city.toLowerCase().includes(query) ||
+      p.profession.toLowerCase().includes(query)
     );
   }, [searchQuery, profiles]);
 
-  
   const handleLike = (id) => {
     alert("پسندیدہ فہرست میں شامل کر دیا گیا!");
   };
 
   return (
     <div className="max-w-md mx-auto min-h-screen bg-[#FDF5F5] relative overflow-x-hidden font-sans pb-24 text-right" dir="rtl">
+      {/* ہیڈر بیک گراؤنڈ */}
       <div className="absolute top-0 left-0 right-0 h-[260px] bg-gradient-to-b from-[#4A0E0E] to-[#631212] rounded-b-[50px] shadow-2xl z-0"></div>
       
       <header className="relative z-10 p-6 flex items-center justify-between">
@@ -35,6 +37,7 @@ const App = () => {
         <Bell className="text-white cursor-pointer" />
       </header>
 
+      {/* سرچ بار سیکشن */}
       <div className="relative z-10 px-6 mt-2 mb-10">
         <div className="relative flex items-center bg-white/10 backdrop-blur-md border border-white/20 rounded-full px-5 py-3.5 shadow-lg focus-within:bg-white/20 transition-all">
           <Search size={20} className="text-yellow-500" />
@@ -63,6 +66,7 @@ const App = () => {
         )}
       </main>
 
+      {/* نیویگیشن بار */}
       <nav className="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white/95 backdrop-blur-md border-t flex justify-around p-4 z-50 rounded-t-3xl shadow-xl">
         {[
           { key: 'discover', label: 'ڈسکور', icon: Compass },
@@ -75,7 +79,7 @@ const App = () => {
             <button 
               key={item.key} 
               onClick={() => setActiveTab(item.key)} 
-              className={`flex flex-col items-center gap-1 ${activeTab === item.key ? 'text-[#4A0E0E]' : 'text-gray-400'}`}
+              className={`flex flex-col items-center gap-1 transition-colors ${activeTab === item.key ? 'text-[#4A0E0E]' : 'text-gray-400'}`}
             >
               <Icon size={24} />
               <span className="text-[10px] font-bold">{item.label}</span>
@@ -84,6 +88,7 @@ const App = () => {
         })}
       </nav>
 
+      {/* پروفائل ڈیٹیل ماڈل */}
       {selectedProfile && (
         <ProfileDetailModal profile={selectedProfile} onClose={() => setSelectedProfile(null)} />
       )}
