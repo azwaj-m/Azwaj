@@ -10,8 +10,9 @@ const App = () => {
   const [profiles] = useState(initialProfiles);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-
+  
   const filteredProfiles = useMemo(() => {
+    if (!searchQuery.trim()) return profiles;
     return profiles.filter(p =>
       p.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -19,6 +20,7 @@ const App = () => {
     );
   }, [searchQuery, profiles]);
 
+  
   const handleLike = (id) => {
     alert("پسندیدہ فہرست میں شامل کر دیا گیا!");
   };
