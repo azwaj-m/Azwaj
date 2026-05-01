@@ -9,12 +9,13 @@ import { EffectCards } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/effect-cards';
 
-// فرضی ڈیٹا اور پیجز کی امپورٹ (اگر موجود ہوں)
+// فرضی ڈیٹا اور پیجز کی امپورٹ
 import { initialProfiles } from './utils/seedData';
 import Discover from './pages/Discover';
 import ProfileSettings from './components/ProfileSettings';
 import EditProfileForm from './components/EditProfileForm';
 import ProfileDetailModal from './components/ProfileDetailModal';
+import Chat from './pages/Chat'; // چیٹ پیج کی امپورٹ
 
 const App = () => {
   // ایپ سٹیٹس
@@ -50,9 +51,9 @@ const App = () => {
     return (
       <div className="max-w-md mx-auto min-h-screen bg-[#4A0E0E] flex flex-col items-center justify-center p-8 text-white text-right" dir="rtl">
         <div className="mb-10 text-center">
-           <img src="/images/Logo.png" alt="Azwaj Logo" className="w-32 h-32 mx-auto mb-4 object-contain drop-shadow-2xl" 
+            <img src="/images/Logo.png" alt="Azwaj Logo" className="w-32 h-32 mx-auto mb-4 object-contain drop-shadow-2xl" 
                 onError={(e) => { e.target.src = "https://via.placeholder.com/150?text=Azwaj"; }} />
-           <h1 className="text-5xl font-serif italic text-[#D4AF37] tracking-tighter">Azwaj</h1>
+            <h1 className="text-5xl font-serif italic text-[#D4AF37] tracking-tighter">Azwaj</h1>
         </div>
         
         <div className="w-full space-y-4">
@@ -90,7 +91,7 @@ const App = () => {
                <span className="text-2xl font-serif font-bold text-[#D4AF37]">Azwaj</span>
             </div>
             <div className="flex gap-4">
-               <Bell className="text-white/80 cursor-pointer" size={22} />
+               < Bell className="text-white/80 cursor-pointer" size={22} />
                <Settings className="text-[#D4AF37] cursor-pointer" onClick={() => setActiveTab('profile')} size={22} />
             </div>
           </header>
@@ -159,6 +160,13 @@ const App = () => {
           </div>
         )}
 
+        {/* چیٹ سیکشن (Active Tab: Messages) */}
+        {activeTab === 'messages' && (
+          <div className="animate-in fade-in duration-300">
+            <Chat />
+          </div>
+        )}
+
         {/* پروفائل اور ایڈٹ سیکشن */}
         {activeTab === 'profile' && (
           <div className="animate-in slide-in-from-left duration-300">
@@ -173,8 +181,8 @@ const App = () => {
           </div>
         )}
 
-        {/* دیگر ٹیبز */}
-        {(activeTab === 'matches' || activeTab === 'messages') && (
+        {/* دیگر ٹیبز (صرح Matches کے لیے) */}
+        {activeTab === 'matches' && (
           <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-10">
             <div className="w-20 h-20 bg-[#D4AF37]/10 rounded-full flex items-center justify-center mb-4">
                <Heart className="text-[#D4AF37] animate-bounce" size={40} />
@@ -214,6 +222,7 @@ const App = () => {
           onClose={() => setSelectedProfile(null)} 
           isPremium={isPremium}
           onUpgrade={() => { setSelectedProfile(null); setActiveTab('matches'); }}
+          onStartChat={() => { setSelectedProfile(null); setActiveTab('messages'); }} // چیٹ شروع کرنے کے لیے
         />
       )}
     </div>
