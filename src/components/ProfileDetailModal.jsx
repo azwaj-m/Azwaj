@@ -2,15 +2,15 @@ import React, { useState } from 'react';
 import { 
   X, MapPin, Calendar, Ruler, GraduationCap, Briefcase, 
   Moon, Users, Star, ThumbsUp, Heart, Shield, Home, Tag, 
-  AlignRight, Info, MessageCircle, User
+  AlignRight, Info, MessageCircle, User, CreditCard, CheckCircle
 } from 'lucide-react';
 
-const ProfileDetailModal = ({ profile, onClose, onLike, isPremium }) => {
+const ProfileDetailModal = ({ profile, onClose, onLike, isPremium, onUpgrade, onStartChat }) => {
   const [liked, setLiked] = useState(false);
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
 
   if (!profile) return null;
 
-  // 15 تفصیلات جو ڈیٹا سے متحرک (Dynamic) طور پر لی گئی ہیں
   const detailItems = [
     { icon: User, label: "نام", value: profile.fullName || profile.nickName },
     { icon: Tag, label: "عرفیت", value: profile.nickName || "دستیاب نہیں" },
@@ -27,113 +27,136 @@ const ProfileDetailModal = ({ profile, onClose, onLike, isPremium }) => {
     { icon: ThumbsUp, label: "پسند/ناپسند", value: profile.likesDislikes || "سادگی" },
   ];
 
-  // چیٹ شروع کرنے کا فنکشن
-  const handleStartChat = () => {
+  // چیٹ ہینڈلر
+  const handleChatRequest = () => {
     if (!isPremium) {
-      alert("چیٹ شروع کرنے کے لیے پریمیم پلان حاصل کریں!");
+      setShowPremiumModal(true);
       return;
     }
-    alert(`${profile.nickName} کے ساتھ چیٹ روم تیار کیا جا رہا ہے...`);
-    // یہاں آپ Chat logic یا Navigation کال کر سکتے ہیں
+    if (onStartChat) onStartChat(profile);
   };
 
-  // لائک کرنے کا فنکشن
+  // لائک ہینڈلر
   const handleLikeToggle = () => {
     setLiked(!liked);
     if (onLike) onLike(profile.id);
-    if (!liked) {
-      alert(`${profile.nickName} کو آپ کی دلچسپی کا پیغام بھیج دیا گیا ہے!`);
-    }
   };
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md transition-all">
-      <div className="w-full max-w-md bg-[#FDF5F5] h-full sm:h-[95vh] flex flex-col overflow-hidden shadow-2xl animate-in slide-in-from-bottom duration-500 rounded-t-[40px] sm:rounded-[40px]">
+    <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center bg-black/90 backdrop-blur-md transition-all p-0 sm:p-4">
+      
+      {/* پریمیم پاپ اپ (Premium Upgrade UI) */}
+      {showPremiumModal && (
+        <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/60 p-6">
+          <div className="bg-white rounded-[40px] w-full max-w-xs p-8 text-center animate-in zoom-in duration-300 shadow-2xl">
+            <div className="w-20 h-20 bg-[#D4AF37]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CreditCard className="text-[#D4AF37]" size={40} />
+            </div>
+            <h3 className="text-xl font-black text-[#4A0E0E] mb-2">رابطہ ممکن نہیں!</h3>
+            <p className="text-xs text-gray-500 mb-6 leading-relaxed">براہ کرم کسی بھی ممبر سے براہ راست بات چیت کرنے کے لیے ہمارا پریمیم پلان حاصل کریں۔</p>
+            <div className="space-y-3">
+              <button onClick={onUpgrade} className="w-full bg-[#D4AF37] text-[#4A0E0E] py-4 rounded-2xl font-black shadow-lg active:scale-95 transition-all">پریمیم پلان دیکھیں</button>
+              <button onClick={() => setShowPremiumModal(false)} className="w-full bg-gray-100 text-gray-600 py-4 rounded-2xl font-bold">بعد میں</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* مین کارڈ */}
+      <div className="w-full max-w-md bg-[#FDF5F5] h-[92vh] sm:h-[95vh] flex flex-col overflow-hidden shadow-2xl animate-in slide-in-from-bottom duration-500 rounded-t-[45px] border-t-4 border-[#D4AF37]/20">
         
-        {/* --- متحرک ہیڈر (Header) --- */}
-        <header className="bg-gradient-to-l from-[#4A0E0E] to-[#631212] p-6 shadow-lg flex items-center justify-between sticky top-0 z-50">
-          <button onClick={onClose} className="text-white hover:bg-white/10 p-2 rounded-full transition-all">
+        {/* ہیڈر */}
+        <header className="bg-gradient-to-l from-[#4A0E0E] to-[#631212] p-6 flex items-center justify-between sticky top-0 z-50">
+          <button onClick={onClose} className="text-white bg-white/10 p-2 rounded-full hover:bg-white/20 transition-all">
             <X size={24} />
           </button>
-          <h2 className="text-xl font-bold text-[#D4AF37] font-serif tracking-wide">پروفائل کارڈ</h2>
+          <div className="flex flex-col items-center">
+            <h2 className="text-lg font-bold text-[#D4AF37] font-serif">پروفائل کارڈ</h2>
+            <div className="flex gap-1">
+                <span className="w-1 h-1 bg-[#D4AF37] rounded-full"></span>
+                <span className="w-4 h-1 bg-[#D4AF37] rounded-full"></span>
+                <span className="w-1 h-1 bg-[#D4AF37] rounded-full"></span>
+            </div>
+          </div>
           <div className="w-10"></div>
         </header>
 
-        {/* --- مین کنٹینٹ (Main Content) --- */}
-        <div className="flex-1 overflow-y-auto px-6 pt-6 pb-32 space-y-6 no-scrollbar" dir="rtl">
+        {/* کنٹینٹ */}
+        <div className="flex-1 overflow-y-auto px-6 pt-6 pb-40 space-y-6 no-scrollbar" dir="rtl">
           
-          {/* پروفائل فوٹو اور سٹیٹس */}
-          <div className="relative flex justify-center">
-            <div className="relative w-full aspect-[3/4] max-h-[400px] bg-[#3D1212] rounded-[40px] border-4 border-white shadow-2xl overflow-hidden group">
+          {/* فوٹو سیکشن */}
+          <div className="relative group">
+            <div className="relative w-full aspect-[4/5] bg-[#3D1212] rounded-[50px] border-8 border-white shadow-2xl overflow-hidden">
               <img 
                 src={profile.profileImg || profile.img} 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
                 alt={profile.fullName} 
               />
-              <div className="absolute top-4 right-4 bg-black/40 backdrop-blur-md px-3 py-1 rounded-full flex items-center gap-2 border border-white/20">
-                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span className="text-[10px] text-white font-black">آن لائن</span>
+              {/* آن لائن سٹیٹس */}
+              <div className="absolute top-6 right-6 bg-green-500/20 backdrop-blur-xl px-4 py-2 rounded-full flex items-center gap-2 border border-green-500/30">
+                <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-ping"></div>
+                <span className="text-[10px] text-white font-black uppercase tracking-widest">Active</span>
               </div>
-              <div className="absolute bottom-0 inset-x-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent"></div>
+              <div className="absolute bottom-0 inset-x-0 h-1/3 bg-gradient-to-t from-black/80 to-transparent"></div>
             </div>
           </div>
 
-          {/* تعارف (Introduction) */}
-          <div className="bg-white p-6 rounded-[35px] shadow-sm border border-red-100">
-            <h3 className="text-[#4A0E0E] font-black text-sm mb-3 flex items-center justify-end gap-2">
-              ایک نظر میں <AlignRight size={18} className="text-[#D4AF37]" />
-            </h3>
-            <p className="text-xs text-gray-600 leading-relaxed text-right font-medium">
-              {profile.intro || "یہ ممبر ایک سنجیدہ رشتے کی تلاش میں ہے اور فیملی اقدار پر یقین رکھتا ہے۔ مزید تفصیلات کے لیے رابطہ کریں۔"}
-            </p>
-          </div>
-
-          {/* کوائف کی لسٹ (Details Grid) */}
-          <div className="bg-white p-6 rounded-[35px] shadow-sm border border-red-100">
-            <h3 className="text-[#4A0E0E] font-black text-sm mb-4 flex items-center justify-end gap-2 border-b border-red-50 pb-3">
-              تفصیلی معلومات <Info size={18} className="text-[#D4AF37]" />
-            </h3>
-            <div className="grid grid-cols-2 gap-3">
+          {/* کوائف - انفارمیشن گریڈ */}
+          <div className="bg-white p-7 rounded-[40px] shadow-sm border border-red-50">
+            <div className="flex items-center justify-between mb-6 border-b border-gray-50 pb-4">
+               <Info size={20} className="text-[#D4AF37]" />
+               <h3 className="text-[#4A0E0E] font-black text-md">تفصیلی بائیو ڈیٹا</h3>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
               {detailItems.map((item, idx) => (
-                <div key={idx} className="bg-[#FDF5F5] p-3 rounded-2xl flex flex-col items-end border border-red-50 hover:bg-[#FCECEC] transition-colors">
-                  <div className="flex items-center gap-1.5 mb-1 opacity-60">
-                    <span className="text-[8px] font-bold text-gray-500 uppercase">{item.label}</span>
-                    <item.icon size={10} className="text-[#4A0E0E]" />
+                <div key={idx} className="bg-[#FDF5F5] p-4 rounded-3xl flex flex-col items-end group hover:bg-[#D4AF37]/5 transition-all border border-transparent hover:border-[#D4AF37]/20">
+                  <div className="flex items-center gap-2 mb-1 opacity-50">
+                    <span className="text-[9px] font-bold text-gray-500">{item.label}</span>
+                    <item.icon size={12} className="text-[#4A0E0E]" />
                   </div>
-                  <p className="text-[11px] font-black text-[#4A0E0E] text-right truncate w-full">{item.value}</p>
+                  <p className="text-[12px] font-black text-[#4A0E0E] text-right">{item.value}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* ویریفیکیشن بیج (Trust) */}
-          <div className="bg-gradient-to-r from-[#D4AF37] to-[#B8860B] p-5 rounded-[30px] flex items-center justify-between shadow-lg shadow-yellow-900/20">
-            <Shield size={35} className="text-[#4A0E0E]" />
-            <div className="text-right text-[#4A0E0E]">
-              <h4 className="font-black text-xs">شجرہ ویریفائیڈ (Verified)</h4>
-              <p className="text-[9px] font-bold opacity-80">اس ممبر کی معلومات درست پائی گئی ہیں</p>
-            </div>
+          {/* ٹرسٹ کارڈ */}
+          <div className="bg-gradient-to-br from-[#4A0E0E] to-[#2D0909] p-6 rounded-[40px] flex items-center justify-between shadow-xl">
+             <div className="bg-[#D4AF37] p-3 rounded-2xl shadow-inner">
+                <Shield size={30} className="text-[#4A0E0E]" />
+             </div>
+             <div className="text-right">
+                <div className="flex items-center justify-end gap-2 mb-1">
+                  <CheckCircle size={14} className="text-[#D4AF37]" />
+                  <h4 className="font-black text-[#D4AF37] text-sm italic">شجرہ ویریفائیڈ</h4>
+                </div>
+                <p className="text-[10px] text-white/60 font-medium leading-tight">اس اکاؤنٹ کی مینوئل تصدیق کی جا چکی ہے اور یہ مکمل محفوظ ہے۔</p>
+             </div>
           </div>
         </div>
 
-        {/* --- ایکشن بٹنز (Footer Actions) --- */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-[#FDF5F5] via-[#FDF5F5] to-transparent flex gap-4 z-[60]">
+        {/* فکسڈ ایکشن بار */}
+        <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-[#FDF5F5] via-[#FDF5F5] to-transparent flex gap-4 z-[100]">
           <button 
-            onClick={handleStartChat}
-            className="flex-[3] h-16 bg-[#4A0E0E] text-[#D4AF37] rounded-3xl font-black flex items-center justify-center gap-3 shadow-2xl active:scale-95 transition-all"
+            onClick={handleChatRequest}
+            className="flex-[4] h-16 bg-[#4A0E0E] text-[#D4AF37] rounded-3xl font-black flex items-center justify-center gap-3 shadow-[0_15px_30px_rgba(74,14,14,0.3)] active:scale-95 transition-all group"
           >
-            <MessageCircle size={22} /> پیغام بھیجیں
+            <div className="bg-[#D4AF37] text-[#4A0E0E] p-1.5 rounded-full group-hover:rotate-12 transition-transform">
+                <MessageCircle size={18} fill="currentColor" />
+            </div>
+            <span className="text-lg">چیٹ شروع کریں</span>
           </button>
           
           <button 
             onClick={handleLikeToggle}
-            className={`flex-1 h-16 rounded-3xl flex items-center justify-center shadow-2xl active:scale-95 transition-all border-2 ${
+            className={`flex-1 h-16 rounded-3xl flex items-center justify-center shadow-lg active:scale-95 transition-all border-2 ${
               liked 
-              ? 'bg-red-500 border-red-500 text-white' 
+              ? 'bg-red-500 border-red-500 text-white animate-pulse' 
               : 'bg-white border-[#4A0E0E]/10 text-[#4A0E0E]'
             }`}
           >
-            <Heart size={26} className={liked ? "fill-current" : ""} />
+            <Heart size={28} className={liked ? "fill-current" : "group-hover:scale-110"} />
           </button>
         </div>
 
@@ -143,3 +166,4 @@ const ProfileDetailModal = ({ profile, onClose, onLike, isPremium }) => {
 };
 
 export default ProfileDetailModal;
+

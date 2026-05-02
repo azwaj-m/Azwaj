@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import {
   ChevronRight, Save, User, Calendar, Ruler,
   GraduationCap, Briefcase, Moon, MapPin, AlignRight,
-  Heart, Coffee, Home, Tag, Camera, Image as ImageIcon, Users
+  Heart, Coffee, Home, Tag, Camera, Image as ImageIcon, Users,
+  Lock, Eye, EyeOff
 } from 'lucide-react';
 
 const EditProfileForm = ({ initialData, onSave, onCancel }) => {
+  // تمام فیلڈز کے لیے پرائیویسی سٹیٹ
   const [formData, setFormData] = useState({
     fullName: initialData?.fullName || "Ayesha",
     nickName: initialData?.nickName || "Ashi",
@@ -22,12 +24,28 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
     intro: initialData?.intro || "I'm very very slow",
     likesDislikes: initialData?.likesDislikes || "Testy spicy food",
     profileImage: initialData?.profileImage || null,
-    selfieImage: initialData?.selfieImage || null
+    // پرائیویسی سیٹنگز: true کا مطلب 'چھپا ہوا' (Hidden)
+    privacy: initialData?.privacy || {
+      dob: false,
+      height: false,
+      ctiy: false,
+      Address: true,
+      family: true,
+      job: false
+    }
   });
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // پرائیویسی ٹوگل کرنے کا فنکشن
+  const togglePrivacy = (field) => {
+    setFormData(prev => ({
+      ...prev,
+      privacy: { ...prev.privacy, [field]: !prev.privacy[field] }
+    }));
   };
 
   const handleImageUpload = (e, field) => {
@@ -46,10 +64,21 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
     onSave(formData);
   };
 
+  // لاک بٹن کمپوننٹ
+  const PrivacyLock = ({ field }) => (
+    <button 
+      type="button"
+      onClick={() => togglePrivacy(field)}
+      className={`p-1 rounded-md transition-all ${formData.privacy[field] ? 'text-red-500 bg-red-50' : 'text-green-500 bg-green-50'}`}
+      title={formData.privacy[field] ? "یہ معلومات چھپی ہوئی ہے" : "یہ معلومات سب کو نظر آئے گی"}
+    >
+      {formData.privacy[field] ? <EyeOff size={14} /> : <Eye size={14} />}
+    </button>
+  );
+
   return (
     <div className="h-screen w-full bg-[#2D0A0A] overflow-y-auto overflow-x-hidden flex flex-col" dir="rtl">
       
-      {/* --- ہیڈر (Header) --- */}
       <header className="bg-gradient-to-l from-[#4A0E0E] to-[#631212] p-6 rounded-b-[40px] shadow-lg flex items-center justify-between sticky top-0 z-50">
         <button type="button" onClick={onCancel} className="text-white opacity-80 p-2 hover:bg-white/10 rounded-full transition-all">
           <ChevronRight size={24} />
@@ -58,9 +87,7 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
         <div className="w-10"></div>
       </header>
 
-      {/* --- مین کنٹینٹ (Main Content) --- */}
       <div className="px-6 space-y-6 pt-8 pb-32">
-        {/* فوٹو سیکشن */}
         <div className="relative flex justify-center">
           <label className="relative w-48 h-64 bg-[#3D1212] rounded-[30px] border-2 border-[#D4AF37] overflow-hidden shadow-2xl flex flex-col items-center justify-center cursor-pointer group">
             {formData.profileImage ? (
@@ -78,8 +105,8 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
           </label>
         </div>
 
-        {/* فارم ایریا */}
         <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-[35px] shadow-2xl border border-red-50">
+          
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <label className="text-[11px] font-bold text-gray-400 mr-2 flex items-center gap-1 justify-end">نام <User size={12} /></label>
@@ -93,28 +120,43 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-gray-400 mr-2 flex items-center gap-1 justify-end">تاریخ پیدائش <Calendar size={12} /></label>
+              <div className="flex items-center justify-end gap-2 px-2">
+                <PrivacyLock field="dob" />
+                <label className="text-[11px] font-bold text-gray-400 flex items-center gap-1">تاریخ پیدائش <Calendar size={12} /></label>
+              </div>
               <input type="date" name="dob" value={formData.dob} onChange={handleChange} className="w-full bg-[#FDF5F5] border-none rounded-2xl p-4 text-xs text-[#4A0E0E] outline-none text-right" />
             </div>
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-gray-400 mr-2 flex items-center gap-1 justify-end">قد <Ruler size={12} /></label>
+              <div className="flex items-center justify-end gap-2 px-2">
+                <PrivacyLock field="height" />
+                <label className="text-[11px] font-bold text-gray-400 flex items-center gap-1">قد <Ruler size={12} /></label>
+              </div>
               <input name="height" value={formData.height} onChange={handleChange} className="w-full bg-[#FDF5F5] border-none rounded-2xl p-4 text-xs text-[#4A0E0E] outline-none text-right" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-gray-400 mr-2 flex items-center gap-1 justify-end">شہر <MapPin size={12} /></label>
+              <div className="flex items-center justify-end gap-2 px-2">
+                <PrivacyLock field="ctiy" />
+                <label className="text-[11px] font-bold text-gray-400 flex items-center gap-1">شہر <MapPin size={12} /></label>
+              </div>
               <input name="ctiy" value={formData.ctiy} onChange={handleChange} className="w-full bg-[#FDF5F5] border-none rounded-2xl p-4 text-xs text-[#4A0E0E] outline-none text-right" />
             </div>
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-gray-400 mr-2 flex items-center gap-1 justify-end">فیملی <Users size={12} /></label>
+              <div className="flex items-center justify-end gap-2 px-2">
+                <PrivacyLock field="family" />
+                <label className="text-[11px] font-bold text-gray-400 flex items-center gap-1">فیملی <Users size={12} /></label>
+              </div>
               <input name="family" value={formData.family} onChange={handleChange} className="w-full bg-[#FDF5F5] border-none rounded-2xl p-4 text-xs text-[#4A0E0E] outline-none text-right" />
             </div>
           </div>
 
           <div className="space-y-1">
-            <label className="text-[11px] font-bold text-gray-400 mr-2 flex items-center gap-1 justify-end">پتہ <Home size={12} /></label>
+            <div className="flex items-center justify-end gap-2 px-2">
+              <PrivacyLock field="Address" />
+              <label className="text-[11px] font-bold text-gray-400 flex items-center gap-1">پتہ <Home size={12} /></label>
+            </div>
             <input name="Address" value={formData.Address} onChange={handleChange} className="w-full bg-[#FDF5F5] border-none rounded-2xl p-4 text-xs text-[#4A0E0E] outline-none text-right" />
           </div>
 
@@ -124,7 +166,10 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
               <input name="education" value={formData.education} onChange={handleChange} className="w-full bg-[#FDF5F5] border-none rounded-2xl p-4 text-xs text-[#4A0E0E] outline-none text-right" />
             </div>
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-gray-400 mr-2 flex items-center gap-1 justify-end">پیشہ <Briefcase size={12} /></label>
+              <div className="flex items-center justify-end gap-2 px-2">
+                <PrivacyLock field="job" />
+                <label className="text-[11px] font-bold text-gray-400 flex items-center gap-1">پیشہ <Briefcase size={12} /></label>
+              </div>
               <input name="job" value={formData.job} onChange={handleChange} className="w-full bg-[#FDF5F5] border-none rounded-2xl p-4 text-xs text-[#4A0E0E] outline-none text-right" />
             </div>
           </div>
@@ -147,7 +192,6 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
         </form>
       </div>
 
-      {/* --- فوٹر ایکشن بٹن (Footer) --- */}
       <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-6 bg-gradient-to-t from-[#2D0A0A] via-[#2D0A0A] to-transparent z-50">
         <button 
           onClick={handleSubmit}
@@ -162,3 +206,5 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
 };
 
 export default EditProfileForm;
+
+
