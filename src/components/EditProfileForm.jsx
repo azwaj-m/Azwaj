@@ -3,11 +3,23 @@ import {
   ChevronRight, Save, User, Calendar, Ruler,
   GraduationCap, Briefcase, Moon, MapPin, AlignRight,
   Heart, Coffee, Home, Tag, Camera, Image as ImageIcon, Users,
-  Lock, Eye, EyeOff
+  Lock, Eye, EyeOff, X
 } from 'lucide-react';
 
 const EditProfileForm = ({ initialData, onSave, onCancel }) => {
-  // تمام فیلڈز کے لیے پرائیویسی سٹیٹ
+  // مذاہب اور مسالک کا ڈیٹا
+  const religionData = {
+    "اسلام": ["سنی", "شیعہ", "اہل حدیث", "دیوبندی", "بریلوی", "دیگر"],
+    "عیسائیت": ["کیتھولک", "پروٹسٹنٹ", "آرتھوڈوکس", "دیگر"],
+    "ہندومت": ["وشنو مت", "شیو مت", "شاکتی مت", "سمارتا مت", "دیگر"],
+    "سکھ مت": ["خالصہ", "نامہ دھاری", "نرنکاری", "دیگر"],
+    "بدھ مت": ["تھیرواد", "مہایان", "وجریان", "دیگر"],
+    "دیگر": ["دیگر"]
+  };
+
+  const [showReligionModal, setShowReligionModal] = useState(false);
+  const [showSectModal, setShowSectModal] = useState(false);
+
   const [formData, setFormData] = useState({
     fullName: initialData?.fullName || "Ayesha",
     nickName: initialData?.nickName || "Ashi",
@@ -15,8 +27,8 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
     height: initialData?.height || "5'8\"",
     education: initialData?.education || "Master of Arts",
     job: initialData?.job || "Teacher",
-    religion: initialData?.religion || "Islam",
-    sect: initialData?.sect || "Sunni",
+    religion: initialData?.religion || "اسلام",
+    sect: initialData?.sect || "سنی",
     ctiy: initialData?.ctiy || "Lahore",
     Address: initialData?.Address || "Iqbal park house # 34/3",
     family: initialData?.family || "2 sisters, 1 brother",
@@ -24,7 +36,6 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
     intro: initialData?.intro || "I'm very very slow",
     likesDislikes: initialData?.likesDislikes || "Testy spicy food",
     profileImage: initialData?.profileImage || null,
-    // پرائیویسی سیٹنگز: true کا مطلب 'چھپا ہوا' (Hidden)
     privacy: initialData?.privacy || {
       dob: false,
       height: false,
@@ -40,7 +51,6 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // پرائیویسی ٹوگل کرنے کا فنکشن
   const togglePrivacy = (field) => {
     setFormData(prev => ({
       ...prev,
@@ -64,7 +74,6 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
     onSave(formData);
   };
 
-  // لاک بٹن کمپوننٹ
   const PrivacyLock = ({ field }) => (
     <button 
       type="button"
@@ -75,6 +84,32 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
       {formData.privacy[field] ? <EyeOff size={14} /> : <Eye size={14} />}
     </button>
   );
+
+  // سلیکشن موڈل (Popup)
+  const SelectionModal = ({ isOpen, onClose, title, options, onSelect }) => {
+    if (!isOpen) return null;
+    return (
+      <div className="fixed inset-0 z-[100] flex items-end justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="bg-white w-full max-w-md rounded-t-[40px] p-8 animate-in slide-in-from-bottom duration-300">
+          <div className="flex justify-between items-center mb-6">
+            <button onClick={onClose} className="p-2 bg-gray-100 rounded-full"><X size={20}/></button>
+            <h3 className="text-lg font-bold text-[#4A0E0E]">{title}</h3>
+          </div>
+          <div className="grid grid-cols-2 gap-3 max-h-[40vh] overflow-y-auto p-2">
+            {options.map((opt) => (
+              <button
+                key={opt}
+                onClick={() => { onSelect(opt); onClose(); }}
+                className="p-4 rounded-2xl bg-[#FDF5F5] text-[#4A0E0E] font-bold text-sm hover:bg-[#D4AF37] hover:text-white transition-colors border border-red-50"
+              >
+                {opt}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="h-screen w-full bg-[#2D0A0A] overflow-y-auto overflow-x-hidden flex flex-col" dir="rtl">
@@ -175,13 +210,25 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
+            {/* مذہب سلیکشن */}
             <div className="space-y-1">
               <label className="text-[11px] font-bold text-gray-400 mr-2 flex items-center gap-1 justify-end">مذہب <Moon size={12} /></label>
-              <input name="religion" value={formData.religion} onChange={handleChange} className="w-full bg-[#FDF5F5] border-none rounded-2xl p-4 text-xs text-[#4A0E0E] outline-none text-right" />
+              <div 
+                onClick={() => setShowReligionModal(true)}
+                className="w-full bg-[#FDF5F5] rounded-2xl p-4 text-xs text-[#4A0E0E] text-right cursor-pointer border border-transparent hover:border-[#D4AF37] transition-all"
+              >
+                {formData.religion}
+              </div>
             </div>
+            {/* مسلک سلیکشن */}
             <div className="space-y-1">
               <label className="text-[11px] font-bold text-gray-400 mr-2 flex items-center gap-1 justify-end">مسلک <Moon size={12} /></label>
-              <input name="sect" value={formData.sect} onChange={handleChange} className="w-full bg-[#FDF5F5] border-none rounded-2xl p-4 text-xs text-[#4A0E0E] outline-none text-right" />
+              <div 
+                onClick={() => setShowSectModal(true)}
+                className="w-full bg-[#FDF5F5] rounded-2xl p-4 text-xs text-[#4A0E0E] text-right cursor-pointer border border-transparent hover:border-[#D4AF37] transition-all"
+              >
+                {formData.sect}
+              </div>
             </div>
           </div>
 
@@ -201,10 +248,26 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
         </button>
       </div>
 
+      {/* پاپ اپ موڈلز */}
+      <SelectionModal 
+        isOpen={showReligionModal} 
+        onClose={() => setShowReligionModal(false)} 
+        title="مذہب منتخب کریں" 
+        options={Object.keys(religionData)} 
+        onSelect={(val) => setFormData(prev => ({ ...prev, religion: val, sect: religionData[val][0] }))} 
+      />
+
+      <SelectionModal 
+        isOpen={showSectModal} 
+        onClose={() => setShowSectModal(false)} 
+        title="مسلک منتخب کریں" 
+        options={religionData[formData.religion] || ["دیگر"]} 
+        onSelect={(val) => setFormData(prev => ({ ...prev, sect: val }))} 
+      />
+
     </div>
   );
 };
 
 export default EditProfileForm;
-
 
