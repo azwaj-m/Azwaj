@@ -12,10 +12,11 @@ import Discover from './pages/Discover';
 import Chat from './pages/Chat';
 import Notifications from './pages/Notifications';
 import ProfileManager from './pages/ProfileManager';
+import Subscription from './pages/Subscription';
 
 const App = () => {
   const [activeTab, setActiveTab] = useState('home');
-  const [currentView, setCurrentView] = useState('main'); 
+  const [currentView, setCurrentView] = useState('main');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
@@ -50,18 +51,24 @@ const App = () => {
     setSelectedProfile(null);
   };
 
-  // مرکزی مواد رینڈر کرنے کا فنکشن (ٹیبز اور سائیڈ بار ویوز کے لیے)
+  // مرکزی مواد رینڈر کرنے کا فنکشن
   const renderContent = () => {
     if (currentView === 'main') {
       switch (activeTab) {
         case 'home':
           return <Home profiles={filteredProfiles} setSelectedProfile={setSelectedProfile} />;
         case 'discover':
-          return <Discover />;
+          return <Discover profiles={filteredProfiles} setSelectedProfile={setSelectedProfile} />;
         case 'chat':
           return <Chat />;
         case 'notifications':
-          return <Notifications />;
+          // یہاں نیویگیشن پراپس مرج کیے گئے ہیں
+          return (
+            <Notifications 
+              setActiveTab={setActiveTab} 
+              setCurrentView={setCurrentView} 
+            />
+          );
         case 'profile':
           return <ProfileManager />;
         default:
@@ -69,7 +76,6 @@ const App = () => {
       }
     }
 
-    // سائیڈ بار کے مخصوص صفحات
     if (currentView === 'blocked') {
       return (
         <div className="p-10 text-center animate-in slide-in-from-bottom duration-500">
@@ -85,12 +91,12 @@ const App = () => {
 
     if (currentView === 'premium') {
       return (
-        <div className="p-10 text-center animate-in fade-in">
-           <h2 className="text-[#4A0E0E] font-black mb-4 text-xl">پریمیم پلان</h2>
-           <p className="text-gray-600 mb-6">مکمل رسائی حاصل کرنے کے لیے اپنا پلان منتخب کریں۔</p>
-           <button onClick={() => {setIsPremium(true); setCurrentView('main');}} className="bg-[#D4AF37] text-[#4A0E0E] px-8 py-3 rounded-2xl font-black shadow-lg mb-4 w-full">پلان خریدیں</button>
-           <button onClick={() => setCurrentView('main')} className="text-[#4A0E0E] font-black underline block w-full">بعد میں</button>
-        </div>
+        <Subscription
+          onUpgrade={() => {
+            setIsPremium(true);
+            setCurrentView('main');
+          }}
+        />
       );
     }
 
@@ -107,15 +113,14 @@ const App = () => {
     return null;
   };
 
-  // اگر ایڈٹ پروفائل ویو میں ہے
   if (currentView === 'edit_profile') {
     return (
-      <EditProfileForm 
+      <EditProfileForm
         onSave={(updatedData) => {
           console.log("Data Saved:", updatedData);
           setCurrentView('main');
-        }} 
-        onCancel={() => setCurrentView('main')} 
+        }}
+        onCancel={() => setCurrentView('main')}
       />
     );
   }
@@ -129,7 +134,6 @@ const App = () => {
         onEditProfile={() => setCurrentView('edit_profile')}
       />
 
-      {/* پروفائل ڈیٹیل ماڈل */}
       {selectedProfile && (
         <ProfileDetailModal
           profile={selectedProfile}
@@ -145,9 +149,13 @@ const App = () => {
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         toggleSidebar={() => setIsSidebarOpen(true)}
+        onNotificationClick={() => {
+          setCurrentView('main');
+          setActiveTab('notifications');
+        }}
       />
 
-      <main className="flex-1 overflow-y-auto no-scrollbar pt-2 pb-32">
+      <main className="flex-1 overflow-y-auto no-scrollbar pt-1 pb-24">
         {renderContent()}
       </main>
 
