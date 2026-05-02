@@ -20,26 +20,27 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
   const [showReligionModal, setShowReligionModal] = useState(false);
   const [showSectModal, setShowSectModal] = useState(false);
 
+  // اسٹیٹ کو مرج کیا گیا اور 'ctiy' کی جگہ 'city' استعمال کیا گیا
   const [formData, setFormData] = useState({
-    fullName: initialData?.fullName || "Ayesha",
-    nickName: initialData?.nickName || "Ashi",
-    dob: initialData?.dob || "1995-05-20",
-    height: initialData?.height || "5'8\"",
-    education: initialData?.education || "Master of Arts",
-    job: initialData?.job || "Teacher",
+    fullName: initialData?.fullName || "",
+    nickName: initialData?.nickName || "",
+    dob: initialData?.dob || "",
+    height: initialData?.height || "",
+    education: initialData?.education || "",
+    job: initialData?.job || "",
     religion: initialData?.religion || "اسلام",
     sect: initialData?.sect || "سنی",
-    ctiy: initialData?.ctiy || "Lahore",
-    Address: initialData?.Address || "Iqbal park house # 34/3",
-    family: initialData?.family || "2 sisters, 1 brother",
-    hobbies: initialData?.hobbies || "Eating",
-    intro: initialData?.intro || "I'm very very slow",
-    likesDislikes: initialData?.likesDislikes || "Testy spicy food",
+    city: initialData?.city || initialData?.ctiy || "", 
+    Address: initialData?.Address || "",
+    family: initialData?.family || "",
+    hobbies: initialData?.hobbies || "",
+    intro: initialData?.intro || "",
+    likesDislikes: initialData?.likesDislikes || "",
     profileImage: initialData?.profileImage || null,
     privacy: initialData?.privacy || {
       dob: false,
       height: false,
-      ctiy: false,
+      city: false,
       Address: true,
       family: true,
       job: false
@@ -79,13 +80,11 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
       type="button"
       onClick={() => togglePrivacy(field)}
       className={`p-1 rounded-md transition-all ${formData.privacy[field] ? 'text-red-500 bg-red-50' : 'text-green-500 bg-green-50'}`}
-      title={formData.privacy[field] ? "یہ معلومات چھپی ہوئی ہے" : "یہ معلومات سب کو نظر آئے گی"}
     >
       {formData.privacy[field] ? <EyeOff size={14} /> : <Eye size={14} />}
     </button>
   );
 
-  // سلیکشن موڈل (Popup)
   const SelectionModal = ({ isOpen, onClose, title, options, onSelect }) => {
     if (!isOpen) return null;
     return (
@@ -113,7 +112,6 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
 
   return (
     <div className="h-screen w-full bg-[#2D0A0A] overflow-y-auto overflow-x-hidden flex flex-col" dir="rtl">
-      
       <header className="bg-gradient-to-l from-[#4A0E0E] to-[#631212] p-6 rounded-b-[40px] shadow-lg flex items-center justify-between sticky top-0 z-50">
         <button type="button" onClick={onCancel} className="text-white opacity-80 p-2 hover:bg-white/10 rounded-full transition-all">
           <ChevronRight size={24} />
@@ -133,22 +131,18 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
                 <span className="text-[#D4AF37] text-xs font-bold">پروفائل فوٹو</span>
               </div>
             )}
-            <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-               <Camera size={32} className="text-white" />
-            </div>
             <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, 'profileImage')} />
           </label>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-[35px] shadow-2xl border border-red-50">
-          
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-gray-400 mr-2 flex items-center gap-1 justify-end">نام <User size={12} /></label>
-              <input name="fullName" value={formData.fullName} onChange={handleChange} className="w-full bg-[#FDF5F5] border-none rounded-2xl p-4 text-xs text-[#4A0E0E] outline-none text-right focus:ring-1 ring-[#D4AF37]" required />
+              <label className="text-[11px] font-bold text-gray-400 flex items-center gap-1 justify-end">نام <User size={12} /></label>
+              <input name="fullName" value={formData.fullName} onChange={handleChange} className="w-full bg-[#FDF5F5] border-none rounded-2xl p-4 text-xs text-[#4A0E0E] outline-none text-right" required />
             </div>
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-gray-400 mr-2 flex items-center gap-1 justify-end">عرفیت <Tag size={12} /></label>
+              <label className="text-[11px] font-bold text-gray-400 flex items-center gap-1 justify-end">عرفیت <Tag size={12} /></label>
               <input name="nickName" value={formData.nickName} onChange={handleChange} className="w-full bg-[#FDF5F5] border-none rounded-2xl p-4 text-xs text-[#4A0E0E] outline-none text-right" />
             </div>
           </div>
@@ -173,10 +167,10 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
               <div className="flex items-center justify-end gap-2 px-2">
-                <PrivacyLock field="ctiy" />
+                <PrivacyLock field="city" />
                 <label className="text-[11px] font-bold text-gray-400 flex items-center gap-1">شہر <MapPin size={12} /></label>
               </div>
-              <input name="ctiy" value={formData.ctiy} onChange={handleChange} className="w-full bg-[#FDF5F5] border-none rounded-2xl p-4 text-xs text-[#4A0E0E] outline-none text-right" />
+              <input name="city" value={formData.city} onChange={handleChange} className="w-full bg-[#FDF5F5] border-none rounded-2xl p-4 text-xs text-[#4A0E0E] outline-none text-right" />
             </div>
             <div className="space-y-1">
               <div className="flex items-center justify-end gap-2 px-2">
@@ -197,7 +191,7 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1">
-              <label className="text-[11px] font-bold text-gray-400 mr-2 flex items-center gap-1 justify-end">تعلیم <GraduationCap size={12} /></label>
+              <label className="text-[11px] font-bold text-gray-400 flex items-center gap-1 justify-end">تعلیم <GraduationCap size={12} /></label>
               <input name="education" value={formData.education} onChange={handleChange} className="w-full bg-[#FDF5F5] border-none rounded-2xl p-4 text-xs text-[#4A0E0E] outline-none text-right" />
             </div>
             <div className="space-y-1">
@@ -210,61 +204,35 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {/* مذہب سلیکشن */}
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-gray-400 mr-2 flex items-center gap-1 justify-end">مذہب <Moon size={12} /></label>
-              <div 
-                onClick={() => setShowReligionModal(true)}
-                className="w-full bg-[#FDF5F5] rounded-2xl p-4 text-xs text-[#4A0E0E] text-right cursor-pointer border border-transparent hover:border-[#D4AF37] transition-all"
-              >
+            <div className="space-y-1" onClick={() => setShowReligionModal(true)}>
+              <label className="text-[11px] font-bold text-gray-400 flex items-center gap-1 justify-end">مذہب <Moon size={12} /></label>
+              <div className="w-full bg-[#FDF5F5] rounded-2xl p-4 text-xs text-[#4A0E0E] text-right cursor-pointer border border-transparent hover:border-[#D4AF37] transition-all">
                 {formData.religion}
               </div>
             </div>
-            {/* مسلک سلیکشن */}
-            <div className="space-y-1">
-              <label className="text-[11px] font-bold text-gray-400 mr-2 flex items-center gap-1 justify-end">مسلک <Moon size={12} /></label>
-              <div 
-                onClick={() => setShowSectModal(true)}
-                className="w-full bg-[#FDF5F5] rounded-2xl p-4 text-xs text-[#4A0E0E] text-right cursor-pointer border border-transparent hover:border-[#D4AF37] transition-all"
-              >
+            <div className="space-y-1" onClick={() => setShowSectModal(true)}>
+              <label className="text-[11px] font-bold text-gray-400 flex items-center gap-1 justify-end">مسلک <Moon size={12} /></label>
+              <div className="w-full bg-[#FDF5F5] rounded-2xl p-4 text-xs text-[#4A0E0E] text-right cursor-pointer border border-transparent hover:border-[#D4AF37] transition-all">
                 {formData.sect}
               </div>
             </div>
           </div>
 
           <div className="space-y-1">
-            <label className="text-[11px] font-bold text-gray-400 mr-2 flex items-center gap-1 justify-end">تعارف <AlignRight size={12} /></label>
+            <label className="text-[11px] font-bold text-gray-400 flex items-center gap-1 justify-end">تعارف <AlignRight size={12} /></label>
             <textarea name="intro" rows="3" value={formData.intro} onChange={handleChange} className="w-full bg-[#FDF5F5] border-none rounded-2xl p-4 text-xs text-[#4A0E0E] outline-none resize-none text-right" />
           </div>
         </form>
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-6 bg-gradient-to-t from-[#2D0A0A] via-[#2D0A0A] to-transparent z-50">
-        <button 
-          onClick={handleSubmit}
-          className="w-full h-16 bg-gradient-to-r from-[#D4AF37] to-[#B8860B] text-[#4A0E0E] rounded-2xl font-black flex items-center justify-center gap-3 shadow-[0_10px_20px_rgba(212,175,55,0.3)] active:scale-95 transition-all uppercase tracking-wider text-sm"
-        >
+        <button onClick={handleSubmit} className="w-full h-16 bg-gradient-to-r from-[#D4AF37] to-[#B8860B] text-[#4A0E0E] rounded-2xl font-black flex items-center justify-center gap-3 shadow-lg active:scale-95 transition-all uppercase tracking-wider text-sm">
           معلومات محفوظ کریں <Save size={20} />
         </button>
       </div>
 
-      {/* پاپ اپ موڈلز */}
-      <SelectionModal 
-        isOpen={showReligionModal} 
-        onClose={() => setShowReligionModal(false)} 
-        title="مذہب منتخب کریں" 
-        options={Object.keys(religionData)} 
-        onSelect={(val) => setFormData(prev => ({ ...prev, religion: val, sect: religionData[val][0] }))} 
-      />
-
-      <SelectionModal 
-        isOpen={showSectModal} 
-        onClose={() => setShowSectModal(false)} 
-        title="مسلک منتخب کریں" 
-        options={religionData[formData.religion] || ["دیگر"]} 
-        onSelect={(val) => setFormData(prev => ({ ...prev, sect: val }))} 
-      />
-
+      <SelectionModal isOpen={showReligionModal} onClose={() => setShowReligionModal(false)} title="مذہب منتخب کریں" options={Object.keys(religionData)} onSelect={(val) => setFormData(prev => ({ ...prev, religion: val, sect: religionData[val][0] }))} />
+      <SelectionModal isOpen={showSectModal} onClose={() => setShowSectModal(false)} title="مسلک منتخب کریں" options={religionData[formData.religion] || ["دیگر"]} onSelect={(val) => setFormData(prev => ({ ...prev, sect: val }))} />
     </div>
   );
 };

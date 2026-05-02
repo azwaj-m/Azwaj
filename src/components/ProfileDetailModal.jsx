@@ -11,23 +11,23 @@ const ProfileDetailModal = ({ profile, onClose, onLike, isPremium, onUpgrade, on
 
   if (!profile) return null;
 
+  // ڈیٹا کی ہم آہنگی: یہاں ہم چیک کر رہے ہیں کہ اگر ڈیٹا EditProfileForm سے آ رہا ہے تو اسے کیسے دکھانا ہے
   const detailItems = [
-    { icon: User, label: "نام", value: profile.fullName || profile.nickName },
+    { icon: User, label: "نام", value: profile.fullName || "نام دستیاب نہیں" },
     { icon: Tag, label: "عرفیت", value: profile.nickName || "دستیاب نہیں" },
-    { icon: Calendar, label: "عمر / پیدائش", value: profile.age ? `${profile.age} سال` : (profile.dob || "25 سال") },
-    { icon: Ruler, label: "قد", value: profile.height || "5'5\"" },
-    { icon: MapPin, label: "شہر", value: profile.city || profile.district },
+    { icon: Calendar, label: "عمر / پیدائش", value: profile.dob || profile.age || "دستیاب نہیں" },
+    { icon: Ruler, label: "قد", value: profile.height || "دستیاب نہیں" },
+    { icon: MapPin, label: "شہر", value: profile.city || profile.ctiy || "دستیاب نہیں" },
     { icon: Users, label: "فیملی", value: profile.family || "معلومات محفوظ ہیں" },
-    { icon: Home, label: "پتہ", value: profile.Address || "تصدیق شدہ ممبر" },
-    { icon: GraduationCap, label: "تعلیم", value: profile.education || "گریجویٹ" },
-    { icon: Briefcase, label: "پیشہ", value: profile.profession || profile.job || "پرائیویٹ جاب" },
+    { icon: Home, label: "پتہ", value: profile.privacy?.Address ? "تصدیق شدہ ممبر" : (profile.Address || "دستیاب نہیں") },
+    { icon: GraduationCap, label: "تعلیم", value: profile.education || "دستیاب نہیں" },
+    { icon: Briefcase, label: "پیشہ", value: profile.job || profile.profession || "دستیاب نہیں" },
     { icon: Moon, label: "مذہب", value: profile.religion || "اسلام" },
     { icon: Moon, label: "مسلک", value: profile.sect || "سنی" },
-    { icon: Star, label: "مشغلے", value: profile.hobbies || "کتب بینی" },
-    { icon: ThumbsUp, label: "پسند/ناپسند", value: profile.likesDislikes || "سادگی" },
+    { icon: Star, label: "مشغلے", value: profile.hobbies || "دستیاب نہیں" },
+    { icon: ThumbsUp, label: "پسند/ناپسند", value: profile.likesDislikes || "دستیاب نہیں" },
   ];
 
-  // چیٹ ہینڈلر
   const handleChatRequest = () => {
     if (!isPremium) {
       setShowPremiumModal(true);
@@ -36,16 +36,15 @@ const ProfileDetailModal = ({ profile, onClose, onLike, isPremium, onUpgrade, on
     if (onStartChat) onStartChat(profile);
   };
 
-  // لائک ہینڈلر
   const handleLikeToggle = () => {
     setLiked(!liked);
-    if (onLike) onLike(profile.id);
+    if (onLike) onLike(profile.id || profile.fullName);
   };
 
   return (
     <div className="fixed inset-0 z-[1000] flex items-end sm:items-center justify-center bg-black/90 backdrop-blur-md transition-all p-0 sm:p-4">
       
-      {/* پریمیم پاپ اپ (Premium Upgrade UI) */}
+      {/* پریمیم پاپ اپ */}
       {showPremiumModal && (
         <div className="fixed inset-0 z-[1100] flex items-center justify-center bg-black/60 p-6">
           <div className="bg-white rounded-[40px] w-full max-w-xs p-8 text-center animate-in zoom-in duration-300 shadow-2xl">
@@ -72,36 +71,29 @@ const ProfileDetailModal = ({ profile, onClose, onLike, isPremium, onUpgrade, on
           </button>
           <div className="flex flex-col items-center">
             <h2 className="text-lg font-bold text-[#D4AF37] font-serif">پروفائل کارڈ</h2>
-            <div className="flex gap-1">
-                <span className="w-1 h-1 bg-[#D4AF37] rounded-full"></span>
-                <span className="w-4 h-1 bg-[#D4AF37] rounded-full"></span>
-                <span className="w-1 h-1 bg-[#D4AF37] rounded-full"></span>
-            </div>
           </div>
           <div className="w-10"></div>
         </header>
 
         {/* کنٹینٹ */}
-        <div className="flex-1 overflow-y-auto px-6 pt-6 pb-40 space-y-6 no-scrollbar" dir="rtl">
+        <div className="flex-1 overflow-y-auto px-6 pt-6 pb-40 space-y-6" dir="rtl">
           
           {/* فوٹو سیکشن */}
           <div className="relative group">
             <div className="relative w-full aspect-[4/5] bg-[#3D1212] rounded-[50px] border-8 border-white shadow-2xl overflow-hidden">
               <img 
-                src={profile.profileImg || profile.img} 
+                src={profile.profileImage || profile.profileImg || "https://via.placeholder.com/400x500?text=No+Image"} 
                 className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
                 alt={profile.fullName} 
               />
-              {/* آن لائن سٹیٹس */}
               <div className="absolute top-6 right-6 bg-green-500/20 backdrop-blur-xl px-4 py-2 rounded-full flex items-center gap-2 border border-green-500/30">
                 <div className="w-2.5 h-2.5 bg-green-500 rounded-full animate-ping"></div>
                 <span className="text-[10px] text-white font-black uppercase tracking-widest">Active</span>
               </div>
-              <div className="absolute bottom-0 inset-x-0 h-1/3 bg-gradient-to-t from-black/80 to-transparent"></div>
             </div>
           </div>
 
-          {/* کوائف - انفارمیشن گریڈ */}
+          {/* انفارمیشن گریڈ */}
           <div className="bg-white p-7 rounded-[40px] shadow-sm border border-red-50">
             <div className="flex items-center justify-between mb-6 border-b border-gray-50 pb-4">
                <Info size={20} className="text-[#D4AF37]" />
@@ -115,7 +107,7 @@ const ProfileDetailModal = ({ profile, onClose, onLike, isPremium, onUpgrade, on
                     <span className="text-[9px] font-bold text-gray-500">{item.label}</span>
                     <item.icon size={12} className="text-[#4A0E0E]" />
                   </div>
-                  <p className="text-[12px] font-black text-[#4A0E0E] text-right">{item.value}</p>
+                  <p className="text-[12px] font-black text-[#4A0E0E] text-right break-words w-full">{item.value}</p>
                 </div>
               ))}
             </div>
@@ -131,20 +123,18 @@ const ProfileDetailModal = ({ profile, onClose, onLike, isPremium, onUpgrade, on
                   <CheckCircle size={14} className="text-[#D4AF37]" />
                   <h4 className="font-black text-[#D4AF37] text-sm italic">شجرہ ویریفائیڈ</h4>
                 </div>
-                <p className="text-[10px] text-white/60 font-medium leading-tight">اس اکاؤنٹ کی مینوئل تصدیق کی جا چکی ہے اور یہ مکمل محفوظ ہے۔</p>
+                <p className="text-[10px] text-white/60 font-medium leading-tight">اس اکاؤنٹ کی مینوئل تصدیق کی جا چکی ہے۔</p>
              </div>
           </div>
         </div>
 
-        {/* فکسڈ ایکشن بار */}
+        {/* ایکشن بار */}
         <div className="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-[#FDF5F5] via-[#FDF5F5] to-transparent flex gap-4 z-[100]">
           <button 
             onClick={handleChatRequest}
-            className="flex-[4] h-16 bg-[#4A0E0E] text-[#D4AF37] rounded-3xl font-black flex items-center justify-center gap-3 shadow-[0_15px_30px_rgba(74,14,14,0.3)] active:scale-95 transition-all group"
+            className="flex-[4] h-16 bg-[#4A0E0E] text-[#D4AF37] rounded-3xl font-black flex items-center justify-center gap-3 shadow-lg active:scale-95 transition-all group"
           >
-            <div className="bg-[#D4AF37] text-[#4A0E0E] p-1.5 rounded-full group-hover:rotate-12 transition-transform">
-                <MessageCircle size={18} fill="currentColor" />
-            </div>
+            <MessageCircle size={22} />
             <span className="text-lg">چیٹ شروع کریں</span>
           </button>
           
@@ -156,14 +146,12 @@ const ProfileDetailModal = ({ profile, onClose, onLike, isPremium, onUpgrade, on
               : 'bg-white border-[#4A0E0E]/10 text-[#4A0E0E]'
             }`}
           >
-            <Heart size={28} className={liked ? "fill-current" : "group-hover:scale-110"} />
+            <Heart size={28} className={liked ? "fill-current" : ""} />
           </button>
         </div>
-
       </div>
     </div>
   );
 };
 
 export default ProfileDetailModal;
-
