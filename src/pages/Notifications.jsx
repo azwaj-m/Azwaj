@@ -1,134 +1,120 @@
-import React, { useState } from 'react';
-import { 
-  Bell, Heart, MessageCircle, Eye, CheckCircle, 
-  UserPlus, ShieldAlert, Gift, Settings, Clock 
-} from 'lucide-react';
+import React from 'react';
+import { MessageCircle, Heart, Crown, User, ChevronRight, Clock, Star } from 'lucide-react';
 
-const Notifications = () => {
-  const [activeFilter, setActiveFilter] = useState('All');
-
-  // فرضی ڈیٹا (بعد میں آپ اسے ڈیٹا بیس سے جوڑ سکتے ہیں)
-  const notificationsData = [
+const Notifications = ({ setActiveTab, setCurrentView }) => {
+  // نوٹیفیکیشنز کا ڈیٹا کیٹیگری کے لحاظ سے
+  const sections = [
     {
-      id: 1,
-      type: 'match',
-      title: 'نیا میچ!',
-      desc: 'ماریا نے آپ کی پروفائل پسند کی ہے۔',
-      time: '2 منٹ پہلے',
-      icon: Heart,
-      color: 'text-red-500',
-      bg: 'bg-red-50',
-      unread: true
+      title: "New",
+      data: [
+        {
+          id: 1,
+          title: 'Aisha Khan sent you a message',
+          time: '2 mins ago',
+          icon: <MessageCircle size={16} />,
+          bgColor: 'bg-blue-50',
+          iconColor: 'text-blue-600',
+          target: { tab: 'chat', view: 'main' }
+        },
+        {
+          id: 2,
+          title: 'Premium Offer: 50% Discount',
+          time: 'Just now',
+          icon: <Crown size={16} />,
+          bgColor: 'bg-amber-50',
+          iconColor: 'text-amber-600',
+          target: { tab: 'home', view: 'premium' }
+        }
+      ]
     },
     {
-      id: 2,
-      type: 'message',
-      title: 'نیا پیغام',
-      desc: 'عثمان نے آپ کو پیغام بھیجا: "السلام علیکم..."',
-      time: '15 منٹ پہلے',
-      icon: MessageCircle,
-      color: 'text-blue-500',
-      bg: 'bg-blue-50',
-      unread: true
-    },
-    {
-      id: 3,
-      type: 'view',
-      title: 'پروفائل ویو',
-      desc: 'سارہ نے آپ کی پروفائل دیکھی ہے۔',
-      time: '1 گھنٹہ پہلے',
-      icon: Eye,
-      color: 'text-amber-500',
-      bg: 'bg-amber-50',
-      unread: false
-    },
-    {
-      id: 4,
-      type: 'system',
-      title: 'پروفائل ویریفائیڈ',
-      desc: 'مبارک ہو! آپ کی پروفائل کی تصدیق ہو گئی ہے۔',
-      time: '2 گھنٹے پہلے',
-      icon: CheckCircle,
-      color: 'text-green-500',
-      bg: 'bg-green-50',
-      unread: false
+      title: "Earlier",
+      data: [
+        {
+          id: 3,
+          title: 'Someone liked your profile',
+          time: '3 hours ago',
+          icon: <Heart size={16} />,
+          bgColor: 'bg-red-50',
+          iconColor: 'text-red-600',
+          target: { tab: 'notifications', view: 'main' }
+        },
+        {
+          id: 4,
+          title: 'Your profile was viewed by 5 people',
+          time: '5 hours ago',
+          icon: <User size={16} />,
+          bgColor: 'bg-purple-50',
+          iconColor: 'text-purple-600',
+          target: { tab: 'profile', view: 'main' }
+        }
+      ]
     }
   ];
 
-  const filters = ['All', 'New Matches', 'Messages', 'System'];
+  const handleNotificationClick = (target) => {
+    if (target.tab) setActiveTab(target.tab);
+    if (target.view) setCurrentView(target.view);
+  };
 
   return (
-    <div className="flex flex-col h-full bg-[#FDF5F5] animate-in fade-in duration-500">
-      
-      {/* ہیڈر سیکشن */}
-      <div className="bg-gradient-to-b from-[#4A0E0E] to-[#631212] p-6 pb-10 rounded-b-[40px] shadow-lg">
-        <div className="flex items-center justify-between mb-4">
-          <button className="bg-white/10 p-2 rounded-xl text-white">
-            <Settings size={20} />
-          </button>
-          <h2 className="text-xl font-black text-[#D4AF37] tracking-wider uppercase">Notifications</h2>
-          <div className="w-10"></div>
-        </div>
-
-        {/* فلٹرز */}
-        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2" dir="rtl">
-          {filters.map((f) => (
-            <button
-              key={f}
-              onClick={() => setActiveFilter(f)}
-              className={`px-4 py-2 rounded-full text-[11px] font-bold whitespace-nowrap transition-all ${
-                activeFilter === f 
-                ? 'bg-[#D4AF37] text-[#4A0E0E] shadow-md scale-105' 
-                : 'bg-white/10 text-white/70 border border-white/5'
-              }`}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
+    <div className="bg-[#FDF5F5] min-h-full pb-20 animate-in fade-in duration-500">
+      {/* ہیڈر */}
+      <div className="p-4 flex justify-between items-center bg-white border-b border-gray-100 sticky top-0 z-10">
+        <h2 className="text-[#4A0E0E] text-xl font-black uppercase tracking-tight">Activity</h2>
+        <button className="text-[10px] font-bold text-[#D4AF37] uppercase bg-[#4A0E0E] px-3 py-1 rounded-full">
+          Mark all read
+        </button>
       </div>
 
-      {/* نوٹیفیکیشن لسٹ */}
-      <div className="flex-1 -mt-6 px-4 space-y-3 pb-32 overflow-y-auto no-scrollbar" dir="rtl">
-        {notificationsData.map((notif) => (
-          <div 
-            key={notif.id}
-            className={`p-4 rounded-[30px] flex items-center gap-4 border transition-all active:scale-[0.98] ${
-              notif.unread ? 'bg-white border-[#D4AF37]/30 shadow-md' : 'bg-white/50 border-gray-100'
-            }`}
-          >
-            {/* آئکن */}
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 ${notif.bg}`}>
-              <notif.icon className={notif.color} size={24} />
+      <div className="p-4 space-y-6">
+        {sections.map((section, idx) => (
+          <div key={idx} className="space-y-3">
+            {/* سیکشن ٹائٹل */}
+            <div className="flex items-center gap-2 px-1">
+              <span className="text-[#4A0E0E] font-black text-xs uppercase tracking-widest">{section.title}</span>
+              <div className="flex-1 h-[1px] bg-gray-200"></div>
             </div>
 
-            {/* متن */}
-            <div className="flex-1 min-w-0 text-right">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] text-gray-400 font-medium flex items-center gap-1">
-                  {notif.time} <Clock size={10} />
-                </span>
-                <h4 className="text-sm font-black text-[#4A0E0E] truncate">{notif.title}</h4>
-              </div>
-              <p className="text-[12px] text-gray-600 leading-tight line-clamp-2">
-                {notif.desc}
-              </p>
+            {/* نوٹیفیکیشن کارڈز */}
+            <div className="space-y-2">
+              {section.data.map((n) => (
+                <div 
+                  key={n.id}
+                  onClick={() => handleNotificationClick(n.target)}
+                  className="bg-white p-3 rounded-2xl flex items-center justify-between shadow-sm border border-transparent active:border-[#D4AF37] active:scale-[0.98] transition-all cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className={`${n.bgColor} ${n.iconColor} p-2.5 rounded-xl`}>
+                      {n.icon}
+                    </div>
+                    <div>
+                      <h4 className="text-[#4A0E0E] font-bold text-[11px] leading-tight">{n.title}</h4>
+                      <div className="flex items-center gap-1 mt-1 text-gray-400">
+                        <Clock size={8} />
+                        <span className="text-[9px] font-medium">{n.time}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <ChevronRight size={14} className="text-gray-300" />
+                </div>
+              ))}
             </div>
-
-            {/* ان ریڈ ڈاٹ */}
-            {notif.unread && (
-              <div className="w-2 h-2 bg-red-500 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.5)]"></div>
-            )}
           </div>
         ))}
 
-        {/* خالی حالت (Empty State) */}
-        {notificationsData.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-20 opacity-30">
-            <Bell size={60} className="mb-4" />
-            <p className="font-bold">کوئی نیا نوٹیفیکیشن نہیں ہے</p>
-          </div>
-        )}
+        {/* سجیشن سیکشن (پریمیم لک) */}
+        <div className="mt-8 bg-gradient-to-r from-[#4A0E0E] to-[#631919] p-4 rounded-[25px] shadow-lg relative overflow-hidden">
+          <Star className="absolute -right-2 -top-2 text-[#D4AF37] opacity-20" size={60} />
+          <h3 className="text-[#D4AF37] font-black text-xs uppercase italic">Top Suggestion</h3>
+          <p className="text-white text-[10px] mt-1 opacity-90">Complete your profile to get 3x more matches today!</p>
+          <button 
+            onClick={() => setCurrentView('edit_profile')}
+            className="mt-3 bg-[#D4AF37] text-[#4A0E0E] text-[9px] font-black px-4 py-1.5 rounded-lg uppercase"
+          >
+            Update Now
+          </button>
+        </div>
       </div>
     </div>
   );

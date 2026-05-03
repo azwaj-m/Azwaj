@@ -25,9 +25,9 @@ const BottomNav = ({ activeTab, setActiveTab }) => {
               <div key={tab.id} className="relative -top-6">
                 <button 
                   onClick={() => setActiveTab(tab.id)} 
-                  className="bg-[#4A0E0E] p-4 rounded-full border-4 border-[#FDF5F5] shadow-2xl active:scale-90 transition-all"
+                  className="bg-[#4A0E0E] p-2 rounded-full border-4 border-[#FDF5F5] shadow-2xl active:scale-90 transition-all"
                 >
-                  <Icon size={24} className="text-[#D4AF37]" />
+                  <Icon size={18} className="text-[#D4AF37]" />
                 </button>
               </div>
             );
