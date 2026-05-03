@@ -9,7 +9,7 @@ import {
 // Components
 import ProfileSettings from '../components/ProfileSettings';
 import EditProfileForm from '../components/EditProfileForm';
-import BlockedProfiles from '../components/BlockedProfiles';
+import BlockedProfiles from './BlockedProfiles';
 
 // Utils
 import { translateBulk } from '../utils/translator';
