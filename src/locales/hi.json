@@ -1,0 +1,16 @@
+{
+  "marriage": "Marriage",
+  "search_placeholder": "Search by country, name, age...",
+  "view_profile": "View Profile",
+  "connect": "Connect",
+  "top_matches": "Top Verified Matches",
+  "explore_all": "Explore All",
+  "age": "Age",
+  "prof": "Profession",
+  "verified_label": "Verified",
+  "verified_sub": "100% Secure",
+  "start_chat": "Start Chat",
+  "upgrade_msg": "Please upgrade to Premium",
+  "logout": "Logout",
+  "dir": "ltr"
+}
