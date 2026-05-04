@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { UserProvider } from './context/UserContext';
 import { initialProfiles } from './utils/seedData';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
@@ -14,7 +15,7 @@ import Notifications from './pages/Notifications';
 import ProfileManager from './pages/ProfileManager';
 import Subscription from './pages/Subscription';
 
-const App = () => {
+const AppContent = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [currentView, setCurrentView] = useState('main');
   const [searchQuery, setSearchQuery] = useState('');
@@ -87,7 +88,6 @@ const App = () => {
         />
       )}
 
-      {/* صرف چیٹ ٹیب میں ہیڈر کو چھپانے کی لاجک یہاں ہے */}
       {activeTab !== 'chat' && (
         <Header
           searchQuery={searchQuery}
@@ -100,13 +100,20 @@ const App = () => {
         />
       )}
 
-      {/* اگر چیٹ ہو تو پیڈنگ pt-0 ورنہ pt-2 */}
       <main className={`flex-1 overflow-y-auto no-scrollbar pb-24 ${activeTab === 'chat' ? 'pt-0' : 'pt-2'}`}>
         {renderContent()}
       </main>
 
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
+  );
+};
+
+const App = () => {
+  return (
+    <UserProvider>
+      <AppContent />
+    </UserProvider>
   );
 };
 
