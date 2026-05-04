@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   User, Heart, ShieldAlert, Crown, Lock, 
-  HelpCircle, LogOut, X, ChevronLeft 
+  HelpCircle, LogOut, X, ChevronLeft, Languages 
 } from 'lucide-react';
+import LanguageSelectorModal from './LanguageSelectorModal';
 
 const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
+  const { t, i18n } = useTranslation();
+  const [isLangModalOpen, setIsLangModalOpen] = useState(false);
+
   const menuItems = [
     { 
       id: 'profile', 
@@ -85,6 +90,21 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
               </div>
             </button>
           ))}
+
+          {/* Language Selection Button - Added Here */}
+          <button
+            onClick={() => setIsLangModalOpen(true)}
+            className="w-full flex items-center justify-between p-3 rounded-2xl bg-[#4A0E0E] text-[#D4AF37] mt-4 shadow-lg hover:bg-[#5A1212] transition-all"
+          >
+            <div className="flex items-center gap-4 flex-row-reverse w-full">
+              <div className="bg-[#D4AF37] p-2 rounded-xl text-[#4A0E0E]">
+                <Languages size={20} />
+              </div>
+              <span className="font-bold text-right flex-1 mr-4 text-xs uppercase tracking-widest">
+                {t('select_language', 'زبان تبدیل کریں')}
+              </span>
+            </div>
+          </button>
         </div>
 
         {/* Footer Info */}
@@ -99,6 +119,12 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
            </div>
         </div>
       </div>
+
+      {/* Language Selector Modal Component */}
+      <LanguageSelectorModal 
+        isOpen={isLangModalOpen} 
+        onClose={() => setIsLangModalOpen(false)} 
+      />
     </>
   );
 };
