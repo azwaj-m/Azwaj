@@ -2,16 +2,13 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.css'
+import './i18n'
+import { UserProvider } from './context/UserContext'
 
-console.log("System Initializing...");
-
-const root = document.getElementById('root');
-if (root) {
-  ReactDOM.createRoot(root).render(
-    
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <UserProvider>
       <App />
-    
-  )
-} else {
-  console.error("Root element not found!");
-}
+    </UserProvider>
+  </React.StrictMode>
+)

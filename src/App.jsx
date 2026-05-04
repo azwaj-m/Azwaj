@@ -1,5 +1,4 @@
 import React, { useState, useMemo } from 'react';
-import { UserProvider } from './context/UserContext';
 import { initialProfiles } from './utils/seedData';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
@@ -7,7 +6,7 @@ import Sidebar from './components/Sidebar';
 import ProfileDetailModal from './components/ProfileDetailModal';
 import EditProfileForm from './components/EditProfileForm';
 
-// پیجز کی امپورٹ
+// Pages
 import Home from './pages/Home';
 import Discover from './pages/Discover';
 import Chat from './pages/Chat';
@@ -15,7 +14,7 @@ import Notifications from './pages/Notifications';
 import ProfileManager from './pages/ProfileManager';
 import Subscription from './pages/Subscription';
 
-const AppContent = () => {
+const App = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [currentView, setCurrentView] = useState('main');
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,8 +26,7 @@ const AppContent = () => {
     return initialProfiles.filter(p =>
       p.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.profession.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.religion && p.religion.toLowerCase().includes(searchQuery.toLowerCase()))
+      p.profession.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }, [searchQuery]);
 
@@ -36,16 +34,6 @@ const AppContent = () => {
     if(tab) setActiveTab(tab);
     setCurrentView(view);
     setIsSidebarOpen(false);
-  };
-
-  const handleStartChat = (profile) => {
-    setActiveTab('chat');
-    setSelectedProfile(null);
-  };
-
-  const handleUpgrade = () => {
-    setCurrentView('premium');
-    setSelectedProfile(null);
   };
 
   const renderContent = () => {
@@ -59,9 +47,9 @@ const AppContent = () => {
         default: return <Home profiles={filteredProfiles} setSelectedProfile={setSelectedProfile} />;
       }
     }
-    if (currentView === 'blocked') return <div className="p-10 text-center">🚫 بلاک شدہ لسٹ</div>;
+    if (currentView === 'blocked') return <div className="p-10 text-center text-[#4A0E0E]">🚫 بلاک شدہ لسٹ</div>;
     if (currentView === 'premium') return <Subscription onUpgrade={() => { setIsPremium(true); setCurrentView('main'); }} />;
-    if (currentView === 'help') return <div className="p-10 text-center">مدد اور سپورٹ</div>;
+    if (currentView === 'help') return <div className="p-10 text-center text-[#4A0E0E]">مدد اور سپورٹ</div>;
     return null;
   };
 
@@ -83,8 +71,8 @@ const AppContent = () => {
           profile={selectedProfile}
           onClose={() => setSelectedProfile(null)}
           isPremium={isPremium}
-          onUpgrade={handleUpgrade}
-          onStartChat={handleStartChat}
+          onUpgrade={() => setCurrentView('premium')}
+          onStartChat={() => setActiveTab('chat')}
         />
       )}
 
@@ -93,10 +81,7 @@ const AppContent = () => {
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           toggleSidebar={() => setIsSidebarOpen(true)}
-          onNotificationClick={() => {
-            setCurrentView('main');
-            setActiveTab('notifications');
-          }}
+          onNotificationClick={() => setActiveTab('notifications')}
         />
       )}
 
@@ -106,14 +91,6 @@ const AppContent = () => {
 
       <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
-  );
-};
-
-const App = () => {
-  return (
-    <UserProvider>
-      <AppContent />
-    </UserProvider>
   );
 };
 
