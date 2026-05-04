@@ -2,12 +2,17 @@ import React, { useState, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
 <<<<<<< HEAD
+<<<<<<< HEAD
   User, Heart, ShieldAlert, Crown, HelpCircle, 
   LogOut, X, Languages, Camera 
 =======
   User, Heart, ShieldAlert, Crown, Lock, 
   HelpCircle, LogOut, X, ChevronLeft, Languages 
 >>>>>>> temp-fix
+=======
+  User, Heart, ShieldAlert, Crown, Lock, 
+  HelpCircle, LogOut, X, ChevronLeft, Languages 
+>>>>>>> 96bd1946e538a972d88b6970e0e4a6ef84790676
 } from 'lucide-react';
 import LanguageSelectorModal from './LanguageSelectorModal';
 
@@ -17,6 +22,7 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
   const [profileImg, setProfileImg] = useState("https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400");
   const fileInputRef = useRef(null);
 
+<<<<<<< HEAD
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -40,6 +46,9 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
 =======
 <<<<<<< HEAD
   const menuItems = [
+=======
+  const menuItems = [
+>>>>>>> 96bd1946e538a972d88b6970e0e4a6ef84790676
     { 
       id: 'profile', 
       label: 'میری پروفائل', 
@@ -69,6 +78,7 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
       label: 'مدد اور سپورٹ', 
       icon: HelpCircle, 
       action: () => onAction('help') 
+<<<<<<< HEAD
 =======
   // سیفٹی چیک کے ساتھ مینو آئٹمز
   const menuItems = [
@@ -116,10 +126,14 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
 >>>>>>> 49f99af (update before pull)
     }
 >>>>>>> temp-fix
+=======
+    }
+>>>>>>> 96bd1946e538a972d88b6970e0e4a6ef84790676
   ];
 
   return (
     <>
+<<<<<<< HEAD
 <<<<<<< HEAD
       {isOpen && (
         <div className="fixed inset-0 bg-black/50 z-[150] backdrop-blur-sm transition-opacity" onClick={onClose} />
@@ -160,10 +174,18 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
           className="fixed inset-0 bg-black/70 z-[250] backdrop-blur-sm transition-opacity duration-300"
           onClick={() => setIsOpen?.(false)}
 >>>>>>> 49f99af (update before pull)
+=======
+      {/* Overlay */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-[150] backdrop-blur-sm transition-opacity"
+          onClick={onClose}
+>>>>>>> 96bd1946e538a972d88b6970e0e4a6ef84790676
         />
       )}
 
       {/* Sidebar Content */}
+<<<<<<< HEAD
 <<<<<<< HEAD
       <div className={`fixed top-0 left-0 h-full w-72 bg-[#FDF5F5] z-[200] transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         
@@ -186,12 +208,23 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
           >
             <X size={26} />
 >>>>>>> 49f99af (update before pull)
+=======
+      <div className={`fixed top-0 left-0 h-full w-72 bg-[#FDF5F5] z-[200] transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        
+        {/* Header Section from Image */}
+        <div className="bg-[#4A0E0E] p-8 text-center relative overflow-hidden">
+          <button onClick={onClose} className="absolute top-4 left-4 text-[#D4AF37]">
+            <X size={24} />
+>>>>>>> 96bd1946e538a972d88b6970e0e4a6ef84790676
           </button>
           
           <div className="relative inline-block mt-4">
             <div className="w-24 h-24 rounded-full border-4 border-[#D4AF37] overflow-hidden mx-auto shadow-xl">
               <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400" alt="User" className="w-full h-full object-cover" />
+<<<<<<< HEAD
 >>>>>>> temp-fix
+=======
+>>>>>>> 96bd1946e538a972d88b6970e0e4a6ef84790676
             </div>
             {/* Camera Floating Button */}
             <button 
@@ -206,6 +239,7 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
         </div>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         {/* Scrollable Menu Area */}
         <div className="flex-1 overflow-y-auto p-4 space-y-2 pb-24 scrollbar-hide">
           {menuItems.map((item) => (
@@ -219,11 +253,16 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
 =======
         <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto custom-scrollbar">
 >>>>>>> 49f99af (update before pull)
+=======
+        {/* Menu Items */}
+        <div className="p-4 mt-4 space-y-2">
+>>>>>>> 96bd1946e538a972d88b6970e0e4a6ef84790676
           {menuItems.map((item) => (
             <button
               key={item.id}
               onClick={() => {
                 item.action();
+<<<<<<< HEAD
 <<<<<<< HEAD
                 onClose();
 =======
@@ -231,6 +270,10 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
 >>>>>>> 49f99af (update before pull)
               }}
 >>>>>>> temp-fix
+=======
+                onClose();
+              }}
+>>>>>>> 96bd1946e538a972d88b6970e0e4a6ef84790676
               className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-[#4A0E0E]/5 transition-colors group"
             >
               <div className="flex items-center gap-4 flex-row-reverse w-full">
@@ -243,6 +286,7 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
           ))}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
           <button
 =======
 <<<<<<< HEAD
@@ -254,6 +298,10 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
           <button 
 >>>>>>> 49f99af (update before pull)
 >>>>>>> temp-fix
+=======
+          {/* Language Selection Button - Added Here */}
+          <button
+>>>>>>> 96bd1946e538a972d88b6970e0e4a6ef84790676
             onClick={() => setIsLangModalOpen(true)}
             className="w-full flex items-center justify-between p-3 rounded-2xl bg-[#4A0E0E] text-[#D4AF37] mt-4 shadow-lg hover:bg-[#5A1212] transition-all"
           >
@@ -270,6 +318,7 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
 
         {/* Footer Info */}
 <<<<<<< HEAD
+<<<<<<< HEAD
         <div className="bg-[#FDF5F5] border-t border-[#4A0E0E]/10 p-6 text-center flex-shrink-0">
            <div className="flex flex-col items-center">
              <button className="flex items-center gap-2 text-red-600 font-black uppercase text-xs mb-4 hover:scale-105 transition-transform">
@@ -278,6 +327,11 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
            <div className="border-t border-[#4A0E0E]/10 pt-4 flex flex-col items-center">
              <button className="flex items-center gap-2 text-red-600 font-black uppercase text-xs mb-4">
 >>>>>>> temp-fix
+=======
+        <div className="absolute bottom-4 left-0 right-0 px-6 text-center">
+           <div className="border-t border-[#4A0E0E]/10 pt-4 flex flex-col items-center">
+             <button className="flex items-center gap-2 text-red-600 font-black uppercase text-xs mb-4">
+>>>>>>> 96bd1946e538a972d88b6970e0e4a6ef84790676
                <LogOut size={16} /> لاگ آؤٹ
              </button>
              <p className="text-[8px] text-gray-400 font-bold uppercase tracking-widest">
@@ -288,12 +342,16 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
       </div>
 
 <<<<<<< HEAD
+<<<<<<< HEAD
       <LanguageSelectorModal isOpen={isLangModalOpen} onClose={() => setIsLangModalOpen(false)} />
 =======
 <<<<<<< HEAD
       {/* Language Selector Modal Component */}
 =======
 >>>>>>> 49f99af (update before pull)
+=======
+      {/* Language Selector Modal Component */}
+>>>>>>> 96bd1946e538a972d88b6970e0e4a6ef84790676
       <LanguageSelectorModal 
         isOpen={isLangModalOpen} 
         onClose={() => setIsLangModalOpen(false)} 
