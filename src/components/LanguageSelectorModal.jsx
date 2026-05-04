@@ -16,7 +16,7 @@ const LanguageSelectorModal = ({ isOpen, onClose }) => {
   const handleLanguageChange = (langCode) => {
     i18n.changeLanguage(langCode);
     document.documentElement.dir = i18n.dir(langCode);
-    onClose(); // زبان بدلنے کے بعد ماڈل بند کر دیں
+    onClose(); 
   };
 
   if (!isOpen) return null;
@@ -53,7 +53,7 @@ const LanguageSelectorModal = ({ isOpen, onClose }) => {
         </div>
 
         {/* زبانوں کی لسٹ */}
-        <div className="flex-1 overflow-y-auto p-2 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-2">
           <div className="grid grid-cols-1 gap-1">
             {filteredLanguages.map((lang) => (
               <button
@@ -81,3 +81,5 @@ const LanguageSelectorModal = ({ isOpen, onClose }) => {
   );
 };
 
+// یہ لائن لازمی ہونی چاہیے تاکہ ایرر ختم ہو جائے
+export default LanguageSelectorModal;
