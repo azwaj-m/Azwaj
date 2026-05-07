@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useUser } from './context/UserContext'; // امپورٹ کرنا لازمی ہے
 import { initialProfiles } from './utils/seedData';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
@@ -15,6 +16,7 @@ import ProfileManager from './pages/ProfileManager';
 import Subscription from './pages/Subscription';
 
 const App = () => {
+  const { loading, user } = useUser(); // Context سے ڈیٹا لیا
   const [activeTab, setActiveTab] = useState('home');
   const [currentView, setCurrentView] = useState('main');
   const [searchQuery, setSearchQuery] = useState('');
@@ -36,10 +38,9 @@ const App = () => {
     setIsSidebarOpen(false);
   };
 
-  // ٹیب تبدیل کرنے کا نیا فنکشن جو ویو کو بھی ری سیٹ کرے گا
   const handleTabChange = (tab) => {
     setActiveTab(tab);
-    setCurrentView('main'); // کسی بھی ٹیب پر کلک کرنے سے مین ویو پر واپسی
+    setCurrentView('main'); 
   };
 
   const renderContent = () => {
@@ -58,6 +59,16 @@ const App = () => {
     if (currentView === 'help') return <div className="p-10 text-center text-[#4A0E0E]">مدد اور سپورٹ</div>;
     return null;
   };
+
+  // اگر فائر بیس لوڈ ہو رہا ہے تو لوڈنگ اسکرین دکھائیں
+  if (loading) {
+    return (
+      <div className="h-screen flex flex-col items-center justify-center bg-[#FDF5F5] text-[#4A0E0E]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#4A0E0E] mb-4"></div>
+        <p className="font-bold">لوڈنگ ہو رہی ہے...</p>
+      </div>
+    );
+  }
 
   if (currentView === 'edit_profile') {
     return <EditProfileForm onSave={() => setCurrentView('main')} onCancel={() => setCurrentView('main')} />;

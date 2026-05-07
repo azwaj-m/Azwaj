@@ -7,11 +7,24 @@ const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [userData, setUserData] = useState(null);
+  const [userData, setUserData] = useState({
+    fullName: "مہمان صارف",
+    profileImg: "https://via.placeholder.com/150",
+    isVerified: false
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // اگر فائر بیس کنکشن میں مسئلہ ہو تو 5 سیکنڈ بعد لوڈنگ زبردستی ختم کر دیں
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn("Firebase took too long, bypassing loading...");
+        setLoading(false);
+      }
+    }, 5000);
+
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+      clearTimeout(timeout);
       setUser(currentUser);
       
       if (currentUser) {
@@ -30,9 +43,15 @@ export const UserProvider = ({ children }) => {
         setUserData(null);
         setLoading(false);
       }
+    }, (error) => {
+      console.error("Auth Error:", error);
+      setLoading(false);
     });
 
-    return () => unsubscribeAuth();
+    return () => {
+      unsubscribeAuth();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const updateProfile = async (updates) => {
@@ -48,14 +67,7 @@ export const UserProvider = ({ children }) => {
 
   return (
     <UserContext.Provider value={{ user, userData, loading, updateProfile }}>
-      {/* سفید سکرین سے بچنے کے لیے لوڈنگ سٹیٹ کو ہینڈل کریں */}
-      {loading ? (
-        <div className="h-screen w-full flex items-center justify-center bg-[#FDF5F5]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#4A0E0E]"></div>
-        </div>
-      ) : (
-        children
-      )}
+      {children}
     </UserContext.Provider>
   );
 };
