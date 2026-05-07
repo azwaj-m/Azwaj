@@ -1,27 +1,52 @@
-import { auth, db, storage } from '../firebaseConfig';
+import { auth, db, storage } from '../utils/firebase';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, updateDoc, getDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-export const handleAuthAndProfile = async (file) => {
-  const provider = new GoogleAuthProvider();
-  const result = await signInWithPopup(auth, provider);
-  const user = result.user;
+// 1. لاگ ان اور پروفائل بنانا/اپڈیٹ کرنا
+export const handleAuthAndProfile = async (file = null) => {
+  try {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    const user = result.user;
 
-  let photoURL = user.photoURL;
-  if (file) {
-    const storageRef = ref(storage, `profiles/${user.uid}`);
-    await uploadBytes(storageRef, file);
-    photoURL = await getDownloadURL(storageRef);
+    let photoURL = user.photoURL;
+    
+    // اگر فائل (تصویر) موجود ہے تو اپلوڈ کریں
+    if (file && file instanceof File) {
+      const storageRef = ref(storage, `profiles/${user.uid}`);
+      await uploadBytes(storageRef, file);
+      photoURL = await getDownloadURL(storageRef);
+    }
+
+    const userDoc = {
+      uid: user.uid,
+      displayName: user.displayName,
+      email: user.email,
+      photoURL: photoURL,
+      lastSeen: new Date(),
+      updatedAt: new Date()
+    };
+
+    await setDoc(doc(db, "users", user.uid), userDoc, { merge: true });
+    return { success: true, user: userDoc };
+  } catch (error) {
+    console.error("Auth Error:", error);
+    return { success: false, error };
   }
+};
 
-  await setDoc(doc(db, "users", user.uid), {
-    dob: file.dob || "",
-    religion: file.religion || "Not Specified",
-    uid: user.uid,
-    displayName: user.displayName,
-    email: user.email,
-    photoURL: photoURL,
-    lastSeen: new Date()
-  }, { merge: true });
+// 2. صرف پروفائل ڈیٹا اپڈیٹ کرنے کے لیے (بغیر ری-لاگ ان)
+export const updateUserProfile = async (userId, data) => {
+  try {
+    const userRef = doc(db, "users", userId);
+    await updateDoc(userRef, {
+      ...data,
+      updatedAt: new Date()
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Update Error:", error);
+    return { success: false, error };
+  }
 };

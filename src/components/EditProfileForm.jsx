@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useUser } from '../context/UserContext';
 import {
   ChevronRight, Save, User, Calendar, Ruler,
   GraduationCap, Briefcase, Moon, MapPin, AlignRight,
@@ -6,7 +7,10 @@ import {
   Lock, Eye, EyeOff, X
 } from 'lucide-react';
 
-const EditProfileForm = ({ initialData, onSave, onCancel }) => {
+const EditProfileForm = ({ onSave, onCancel }) => {
+  const { user, userData, updateProfile } = useUser();
+  const [isSaving, setIsSaving] = useState(false);
+
   // مذاہب اور مسالک کا ڈیٹا
   const religionData = {
     "اسلام": ["سنی", "شیعہ", "اہل حدیث", "دیوبندی", "بریلوی", "دیگر"],
@@ -20,24 +24,24 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
   const [showReligionModal, setShowReligionModal] = useState(false);
   const [showSectModal, setShowSectModal] = useState(false);
 
-  // اسٹیٹ کو مرج کیا گیا اور 'ctiy' کی جگہ 'city' استعمال کیا گیا
+  // اسٹیٹ کو موجودہ ڈیٹا سے لوڈ کیا گیا
   const [formData, setFormData] = useState({
-    fullName: initialData?.fullName || "",
-    nickName: initialData?.nickName || "",
-    dob: initialData?.dob || "",
-    height: initialData?.height || "",
-    education: initialData?.education || "",
-    job: initialData?.job || "",
-    religion: initialData?.religion || "اسلام",
-    sect: initialData?.sect || "سنی",
-    city: initialData?.city || initialData?.ctiy || "", 
-    Address: initialData?.Address || "",
-    family: initialData?.family || "",
-    hobbies: initialData?.hobbies || "",
-    intro: initialData?.intro || "",
-    likesDislikes: initialData?.likesDislikes || "",
-    profileImage: initialData?.profileImage || null,
-    privacy: initialData?.privacy || {
+    fullName: userData?.fullName || "",
+    nickName: userData?.nickName || "",
+    dob: userData?.dob || "",
+    height: userData?.height || "",
+    education: userData?.education || "",
+    job: userData?.job || "",
+    religion: userData?.religion || "اسلام",
+    sect: userData?.sect || "سنی",
+    city: userData?.city || "", 
+    Address: userData?.Address || "",
+    family: userData?.family || "",
+    hobbies: userData?.hobbies || "",
+    intro: userData?.intro || "",
+    likesDislikes: userData?.likesDislikes || "",
+    profileImage: userData?.profileImage || null,
+    privacy: userData?.privacy || {
       dob: false,
       height: false,
       city: false,
@@ -70,9 +74,23 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     if (e) e.preventDefault();
-    onSave(formData);
+    if (!user) {
+        alert("آپ لاگ ان نہیں ہیں!");
+        return;
+    }
+    
+    setIsSaving(true);
+    const result = await updateProfile(formData);
+    setIsSaving(false);
+
+    if (result.success) {
+      alert("پروفائل کامیابی سے اپڈیٹ ہو گئی!");
+      onSave(); // واپس مین ویو پر جانے کے لیے
+    } else {
+      alert("خرابی: ڈیٹا محفوظ نہیں ہو سکا");
+    }
   };
 
   const PrivacyLock = ({ field }) => (
@@ -226,8 +244,12 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
       </div>
 
       <div className="fixed bottom-0 left-0 right-0 max-w-md mx-auto p-6 bg-gradient-to-t from-[#2D0A0A] via-[#2D0A0A] to-transparent z-50">
-        <button onClick={handleSubmit} className="w-full h-16 bg-gradient-to-r from-[#D4AF37] to-[#B8860B] text-[#4A0E0E] rounded-2xl font-black flex items-center justify-center gap-3 shadow-lg active:scale-95 transition-all uppercase tracking-wider text-sm">
-          معلومات محفوظ کریں <Save size={20} />
+        <button 
+          onClick={handleSubmit} 
+          disabled={isSaving}
+          className={`w-full h-16 bg-gradient-to-r from-[#D4AF37] to-[#B8860B] text-[#4A0E0E] rounded-2xl font-black flex items-center justify-center gap-3 shadow-lg active:scale-95 transition-all uppercase tracking-wider text-sm ${isSaving ? 'opacity-70 cursor-not-allowed' : ''}`}
+        >
+          {isSaving ? "محفوظ ہو رہا ہے..." : "معلومات محفوظ کریں"} <Save size={20} />
         </button>
       </div>
 
@@ -238,4 +260,3 @@ const EditProfileForm = ({ initialData, onSave, onCancel }) => {
 };
 
 export default EditProfileForm;
-
