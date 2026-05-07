@@ -1,13 +1,12 @@
 import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import react from '@vitejs/react-devtools'
 
 export default defineConfig({
   plugins: [react()],
-  server: {
-    host: true
-  },
   build: {
     outDir: 'dist',
-    chunkSizeWarningLimit: 1600,
+  },
+  server: {
+    historyApiFallback: true,
   }
 })
