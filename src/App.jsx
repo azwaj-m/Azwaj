@@ -36,6 +36,12 @@ const App = () => {
     setIsSidebarOpen(false);
   };
 
+  // ٹیب تبدیل کرنے کا نیا فنکشن جو ویو کو بھی ری سیٹ کرے گا
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    setCurrentView('main'); // کسی بھی ٹیب پر کلک کرنے سے مین ویو پر واپسی
+  };
+
   const renderContent = () => {
     if (currentView === 'main') {
       switch (activeTab) {
@@ -76,7 +82,7 @@ const App = () => {
         />
       )}
 
-      {activeTab !== 'chat' && (
+      {activeTab !== 'chat' && activeTab !== 'profile' && currentView === 'main' && (
         <Header
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
@@ -85,11 +91,11 @@ const App = () => {
         />
       )}
 
-      <main className={`flex-1 overflow-y-auto no-scrollbar pb-24 ${activeTab === 'chat' ? 'pt-0' : 'pt-2'}`}>
+      <main className={`flex-1 overflow-y-auto no-scrollbar pb-24 ${(activeTab === 'chat' || activeTab === 'profile' || currentView !== 'main') ? 'pt-0' : 'pt-2'}`}>
         {renderContent()}
       </main>
 
-      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+      <BottomNav activeTab={activeTab} setActiveTab={handleTabChange} />
     </div>
   );
 };
