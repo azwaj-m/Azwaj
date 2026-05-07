@@ -7,20 +7,14 @@ const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [userData, setUserData] = useState({
-    fullName: "لوڈنگ...",
-    profileImg: "https://via.placeholder.com/150",
-    isVerified: false
-  });
+  const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // 1. چیک کریں کہ صارف لاگ ان ہے یا نہیں
     const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       
       if (currentUser) {
-        // 2. اگر لاگ ان ہے تو Firestore سے ڈیٹا ریئل ٹائم میں لیں
         const userDocRef = doc(db, "users", currentUser.uid);
         const unsubscribeDoc = onSnapshot(userDocRef, (snapshot) => {
           if (snapshot.exists()) {
@@ -31,7 +25,6 @@ export const UserProvider = ({ children }) => {
           console.error("Firestore Error:", error);
           setLoading(false);
         });
-        
         return () => unsubscribeDoc();
       } else {
         setUserData(null);
@@ -42,22 +35,27 @@ export const UserProvider = ({ children }) => {
     return () => unsubscribeAuth();
   }, []);
 
-  // 3. ڈیٹا اپڈیٹ کرنے کا فنکشن (جو براہ راست فائر بیس میں سیو کرے گا)
   const updateProfile = async (updates) => {
-    if (!user) return { success: false, error: "صارف لاگ ان نہیں ہے" };
+    if (!user) return { success: false, error: "لاگ ان ضروری ہے" };
     try {
       const userDocRef = doc(db, "users", user.uid);
       await updateDoc(userDocRef, updates);
       return { success: true };
     } catch (error) {
-      console.error("Update Error:", error);
       return { success: false, error };
     }
   };
 
   return (
     <UserContext.Provider value={{ user, userData, loading, updateProfile }}>
-      {!loading && children}
+      {/* سفید سکرین سے بچنے کے لیے لوڈنگ سٹیٹ کو ہینڈل کریں */}
+      {loading ? (
+        <div className="h-screen w-full flex items-center justify-center bg-[#FDF5F5]">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#4A0E0E]"></div>
+        </div>
+      ) : (
+        children
+      )}
     </UserContext.Provider>
   );
 };
