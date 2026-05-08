@@ -1,107 +1,202 @@
-import React from 'react';
-import { Check, Crown, Star, ShieldCheck } from 'lucide-react';
+import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { useUser } from '../context/UserContext';
+import { PaymentService } from '../services/PaymentService';
+import { Crown, Check, ShieldCheck, CreditCard, Lock, Smartphone, RefreshCw } from 'lucide-react';
 
-const Subscription = ({ onUpgrade }) => {
-  const plans = [
-    {
-      name: "SILVER",
-      duration: "1 MONTH",
-      price: "$19.99",
-      color: "from-gray-300 to-gray-500",
-      icon: <Star className="text-gray-600" size={30} />,
-      btnBg: "bg-gray-700"
-    },
-    {
-      name: "GOLD",
-      duration: "3 MONTHS",
-      price: "$39.99",
-      color: "from-[#D4AF37] to-[#BF953F]",
-      icon: <Crown className="text-[#4A0E0E]" size={35} />,
-      btnBg: "bg-[#4A0E0E]",
-      popular: true
-    },
-    {
-      name: "PLATINUM",
-      duration: "6 MONTHS",
-      price: "$59.99",
-      color: "from-gray-100 to-gray-400",
-      icon: <Crown className="text-gray-800" size={30} />,
-      btnBg: "bg-gray-800"
+const Subscription = () => {
+  const { t } = useTranslation();
+  const { userData, setUserData } = useUser();
+  const [selectedPlan, setSelectedPlan] = useState('diamond_three_months');
+  const [paymentMethod, setPaymentMethod] = useState('easypaisa'); // easypaisa, jazzcash
+  const [mobileNumber, setMobileNumber] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [paymentStatus, setPaymentStatus] = useState(null);
+
+  const plans = PaymentService.getPlans();
+  const activePlan = plans.find(p => p.id === selectedPlan);
+
+  const handlePay = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setPaymentStatus(null);
+
+    const result = await PaymentService.processPayment({
+      planId: selectedPlan,
+      paymentMethod,
+      mobileNumber
+    });
+
+    setLoading(false);
+    if (result.success) {
+      setPaymentStatus({ success: true, message: result.message, txId: result.txId });
+      // گلوبل اسٹیٹ اپ ڈیٹ کریں
+      if (setUserData) {
+        setUserData(prev => ({
+          ...prev,
+          isPremium: true,
+          premiumPlan: selectedPlan
+        }));
+      }
+    } else {
+      setPaymentStatus({ success: false, message: result.message });
     }
-  ];
-
-  const features = [
-    "Send Unlimited Messages",
-    "Full Profile Access",
-    "Highlighted Profile Badge",
-    "See Visitors Who Viewed You"
-  ];
+  };
 
   return (
-    <div className="min-h-full bg-[#FDF5F5] pb-20 animate-in fade-in duration-700">
-      {/* ٹاپ بینر */}
-      <div className="relative h-56 bg-[#4A0E0E] rounded-b-[50px] flex flex-col items-center justify-center p-6 text-center shadow-2xl overflow-hidden">
-        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/pinstriped-suit.png')]"></div>
-        <Crown className="text-[#D4AF37] mb-2 animate-bounce" size={40} />
-        <h1 className="text-[#D4AF37] text-3xl font-black tracking-widest uppercase italic">Premium Access</h1>
-        <p className="text-white/80 text-sm mt-2 font-medium">Unlock your destiny with our exclusive features</p>
+    <div className="bg-[#FDF5F5] min-h-screen pb-24 text-right" dir="rtl">
+      {/* ہیڈر */}
+      <div className="bg-gradient-to-l from-[#4A0E0E] to-[#631212] text-white p-8 rounded-b-[45px] text-center relative overflow-hidden shadow-lg">
+        <Crown className="mx-auto text-[#D4AF37] mb-2 animate-bounce" size={40} />
+        <h1 className="text-xl font-black font-serif text-[#D4AF37] mb-2">ازواج پریمیم ممبرشپ</h1>
+        <p className="text-[11px] text-white/80 max-w-xs mx-auto">
+          بہترین اور تصدیق شدہ ازدواجی رشتوں سے براہ راست واٹس ایپ اور فون پر فوری رابطہ کریں۔
+        </p>
       </div>
 
-      {/* فیچرز لسٹ */}
-      <div className="mx-6 -mt-8 bg-white rounded-[30px] p-6 shadow-xl border border-[#D4AF37]/20 relative z-10">
-        <div className="grid grid-cols-1 gap-3">
-          {features.map((feature, index) => (
-            <div key={index} className="flex items-center gap-3">
-              <div className="bg-[#D4AF37]/20 p-1 rounded-full">
-                <Check className="text-[#4A0E0E]" size={16} strokeWidth={3} />
+      <div className="p-4 max-w-md mx-auto space-y-6">
+        {/* پلانز کا انتخاب */}
+        <div className="space-y-3">
+          <h3 className="font-black text-xs text-[#4A0E0E] px-1">۱۔ اپنا پریمیم پلان منتخب کریں:</h3>
+          <div className="grid grid-cols-1 gap-3">
+            {plans.map((plan) => (
+              <div
+                key={plan.id}
+                onClick={() => setSelectedPlan(plan.id)}
+                className={`p-4 rounded-3xl border-2 transition-all cursor-pointer relative bg-white ${
+                  selectedPlan === plan.id 
+                    ? 'border-[#D4AF37] bg-amber-50/10 shadow-md' 
+                    : 'border-transparent shadow-sm hover:border-gray-200'
+                }`}
+              >
+                {plan.popular && (
+                  <span className="absolute -top-2.5 left-4 bg-[#D4AF37] text-[#4A0E0E] text-[8px] font-black px-2.5 py-1 rounded-full uppercase">
+                    سب سے مقبول
+                  </span>
+                )}
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                      selectedPlan === plan.id ? 'border-[#D4AF37]' : 'border-gray-300'
+                    }`}>
+                      {selectedPlan === plan.id && <div className="w-2.5 h-2.5 bg-[#D4AF37] rounded-full" />}
+                    </div>
+                    <div>
+                      <h4 className="font-black text-xs text-[#4A0E0E]">{plan.name}</h4>
+                      <p className="text-[9px] text-gray-400 mt-0.5">مدت: {plan.duration}</p>
+                    </div>
+                  </div>
+                  <div className="text-left">
+                    <span className="text-base font-black text-[#4A0E0E]">Rs. {plan.price}</span>
+                    <p className="text-[8px] text-gray-400">یک وقتی ادائیگی</p>
+                  </div>
+                </div>
               </div>
-              <span className="text-[#4A0E0E] font-bold text-sm">{feature}</span>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* پلان کارڈز */}
-      <div className="mt-8 px-4 grid grid-cols-3 gap-3">
-        {plans.map((plan, index) => (
-          <div 
-            key={index} 
-            className={`relative flex flex-col items-center p-4 rounded-[25px] border-2 shadow-lg transition-transform active:scale-95 ${
-              plan.popular ? 'border-[#D4AF37] bg-white scale-105 z-20' : 'border-gray-200 bg-white/50'
-            }`}
-          >
-            {plan.popular && (
-              <span className="absolute -top-3 bg-[#4A0E0E] text-[#D4AF37] text-[8px] font-black px-2 py-1 rounded-full">MOST POPULAR</span>
-            )}
-            
-            <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${plan.color} flex items-center justify-center mb-3 shadow-md`}>
-              {plan.icon}
-            </div>
+        {/* منتخب شدہ پلان کے فیچرز */}
+        {activePlan && (
+          <div className="bg-white p-5 rounded-[30px] shadow-sm border border-red-50/50 space-y-3">
+            <h4 className="font-black text-[11px] text-[#4A0E0E] flex items-center gap-1.5 border-b pb-2">
+              <Crown size={14} className="text-[#D4AF37]" />
+              شامل فیچرز:
+            </h4>
+            <ul className="space-y-2">
+              {activePlan.features.map((feat, idx) => (
+                <li key={idx} className="flex items-center gap-2 text-[10px] font-bold text-gray-600">
+                  <Check size={14} className="text-emerald-500 flex-shrink-0" />
+                  <span>{feat}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
 
-            <h3 className="text-[#4A0E0E] font-black text-xs tracking-tighter">{plan.name}</h3>
-            <p className="text-gray-500 text-[9px] font-bold mb-2">{plan.duration}</p>
-            <div className="text-[#4A0E0E] font-black text-sm mb-4">{plan.price}</div>
-            
-            <button 
-              onClick={() => onUpgrade && onUpgrade()}
-              className={`w-full py-2 rounded-xl text-[10px] font-black text-white shadow-md uppercase tracking-wider ${plan.btnBg}`}
+        {/* ادائیگی کا فارم */}
+        <div className="bg-white p-6 rounded-[35px] shadow-sm border border-red-50/50 space-y-4">
+          <h3 className="font-black text-xs text-[#4A0E0E] border-b pb-2">۲۔ موبائل اکاؤنٹ سے ادائیگی کریں</h3>
+          
+          {/* ادائیگی کا طریقہ منتخب کریں */}
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() => setPaymentMethod('easypaisa')}
+              className={`p-3 rounded-2xl border-2 flex flex-col items-center justify-center gap-1.5 transition ${
+                paymentMethod === 'easypaisa' ? 'border-[#3bb34a] bg-emerald-50/20' : 'border-gray-100 hover:border-gray-200'
+              }`}
             >
-              Subscribe
+              <Smartphone size={20} className={paymentMethod === 'easypaisa' ? 'text-[#3bb34a]' : 'text-gray-400'} />
+              <span className="text-[10px] font-black text-[#3bb34a]">EasyPaisa</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setPaymentMethod('jazzcash')}
+              className={`p-3 rounded-2xl border-2 flex flex-col items-center justify-center gap-1.5 transition ${
+                paymentMethod === 'jazzcash' ? 'border-[#e62020] bg-rose-50/10' : 'border-gray-100 hover:border-gray-200'
+              }`}
+            >
+              <Smartphone size={20} className={paymentMethod === 'jazzcash' ? 'text-[#e62020]' : 'text-gray-400'} />
+              <span className="text-[10px] font-black text-[#e62020]">JazzCash</span>
             </button>
           </div>
-        ))}
-      </div>
 
-      {/* فوٹر ٹیکسٹ */}
-      <div className="mt-10 px-10 text-center">
-        <div className="flex items-center justify-center gap-2 text-gray-400 mb-2">
-          <ShieldCheck size={16} />
-          <span className="text-[10px]">Secure Encrypted Payment</span>
+          <form onSubmit={handlePay} className="space-y-4">
+            <div>
+              <label className="block text-[10px] font-bold text-gray-500 mb-1.5">اپنا موبائل اکاؤنٹ نمبر درج کریں:</label>
+              <input
+                type="tel"
+                placeholder="مثال: 03001234567"
+                required
+                value={mobileNumber}
+                onChange={(e) => setMobileNumber(e.target.value)}
+                disabled={loading}
+                className="w-full h-12 px-4 rounded-xl bg-gray-50 border border-gray-100 focus:border-[#D4AF37] focus:bg-white transition text-center font-bold text-sm tracking-widest placeholder-gray-300"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full h-12 bg-[#4A0E0E] text-[#D4AF37] rounded-2xl font-black text-xs flex items-center justify-center gap-2 transition hover:bg-[#320808] active:scale-[0.98] disabled:opacity-50"
+            >
+              {loading ? (
+                <>
+                  <RefreshCw className="animate-spin" size={14} />
+                  ادائیگی کا عمل جاری ہے...
+                </>
+              ) : (
+                <>
+                  <Lock size={14} />
+                  محفوظ ادائیگی کریں (Rs. {activePlan?.price})
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* سیکیورٹی نوٹس */}
+          <div className="flex items-center justify-center gap-1.5 text-gray-400 text-[8px] font-bold">
+            <ShieldCheck size={12} className="text-emerald-500" />
+            256-Bit SSL انکرپٹڈ محفوظ ترین نظام
+          </div>
         </div>
-        <p className="text-gray-400 text-[10px] leading-relaxed">
-          Your subscription will renew automatically. <br />
-          Cancel anytime from settings.
-        </p>
+
+        {/* پیمنٹ رزلٹ الرٹس */}
+        {paymentStatus && (
+          <div className={`p-4 rounded-3xl text-center space-y-2 border animate-in fade-in ${
+            paymentStatus.success 
+              ? 'bg-emerald-50 border-emerald-100 text-emerald-800' 
+              : 'bg-rose-50 border-rose-100 text-rose-800'
+          }`}>
+            <h4 className="font-black text-xs">{paymentStatus.success ? "شاندار کامیابی!" : "ادائیگی میں ناکامی"}</h4>
+            <p className="text-[10px] font-bold leading-relaxed">{paymentStatus.message}</p>
+            {paymentStatus.success && (
+              <p className="text-[9px] font-mono opacity-70">ٹرانزیکشن ID: {paymentStatus.txId}</p>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

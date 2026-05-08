@@ -3,9 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { useUser } from '../context/UserContext';
 import { 
   User, Heart, ShieldAlert, Crown, HelpCircle, 
-  LogOut, X, Languages, Camera 
+  LogOut, X, Languages, Camera, ShieldCheck 
 } from 'lucide-react';
 import LanguageSelectorModal from './LanguageSelectorModal';
+import VerifiedBadge from './VerifiedBadge';
 
 const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
   const { t, i18n } = useTranslation();
@@ -24,6 +25,7 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
 
   const menuItems = [
     { id: 'profile', label: 'میری پروفائل', icon: User, action: () => onEditProfile() },
+    { id: 'verification', label: 'شناختی تصدیق (CNIC)', icon: ShieldCheck, action: () => onAction('verification') },
     { id: 'discover', label: 'پسندیدہ رشتے', icon: Heart, action: () => onAction('main', 'discover') },
     { id: 'blocked', label: 'بلاک شدہ لسٹ', icon: ShieldAlert, action: () => onAction('blocked') },
     { id: 'premium', label: 'پریمیم ممبرشپ', icon: Crown, action: () => onAction('premium') },
@@ -54,12 +56,18 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
               className="w-24 h-24 rounded-full border-4 border-[#D4AF37] overflow-hidden mx-auto shadow-xl cursor-pointer relative"
               onClick={() => fileInputRef.current.click()}
             >
-              <img src={userData.profileImg} alt="User" className="w-full h-full object-cover group-hover:opacity-50" />
+              <img src={userData?.profileImg} alt="User" className="w-full h-full object-cover group-hover:opacity-50" />
               <Camera className="absolute inset-0 m-auto text-white opacity-0 group-hover:opacity-100" size={24} />
             </div>
           </div>
-          <h2 className="text-[#D4AF37] mt-4 text-2xl font-black italic">{userData.name}</h2>
-          <p className="text-[#D4AF37]/60 text-[8px] uppercase font-bold tracking-widest">Verified Account</p>
+          {/* نام اور ڈائنامک ویریفیکیشن بیج */}
+          <h2 className="text-[#D4AF37] mt-4 text-2xl font-black italic flex items-center justify-center gap-1.5">
+            {userData?.name}
+            <VerifiedBadge status={userData?.verificationStatus} />
+          </h2>
+          <p className="text-[#D4AF37]/60 text-[8px] uppercase font-bold tracking-widest">
+            {userData?.verificationStatus === 'verified' ? 'Verified Account' : 'Verification Required'}
+          </p>
         </div>
 
         <div className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-hide">

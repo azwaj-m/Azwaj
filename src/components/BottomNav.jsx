@@ -1,9 +1,11 @@
 import React from 'react';
-import { Home, Heart, MessageCircle, User, Crown, Bell } from 'lucide-react';
+import { Home, Heart, MessageCircle, User, Crown, Bell, ShieldCheck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useUser } from '../context/UserContext';
 
 const BottomNav = ({ activeTab, setActiveTab }) => {
   const { t } = useTranslation();
+  const { userData } = useUser();
 
   const tabs = [
     { id: 'home', label: 'Home', icon: Home },
@@ -47,11 +49,19 @@ const BottomNav = ({ activeTab, setActiveTab }) => {
         })}
       </nav>
 
-      {/* پریمیم اسٹیٹس بار */}
+      {/* پریمیم اور ویریفیکیشن اسٹیٹس بار */}
       <div className="bg-[#4A0E0E] py-1.5 px-4 flex justify-between items-center text-[8px] text-white font-black uppercase tracking-widest border-t border-[#D4AF37]/20">
-         <div className="flex items-center gap-1">
-           <Crown size={12} className="text-[#D4AF37] fill-[#D4AF37]"/>
-           <span className="text-[#D4AF37]">Premium</span>
+         <div className="flex items-center gap-3">
+           <div className="flex items-center gap-1">
+             <Crown size={12} className="text-[#D4AF37] fill-[#D4AF37]"/>
+             <span className="text-[#D4AF37]">Premium</span>
+           </div>
+           {userData?.verificationStatus === 'verified' && (
+             <div className="flex items-center gap-0.5 text-blue-400">
+               <ShieldCheck size={11} className="fill-blue-500 text-white" />
+               <span>Verified</span>
+             </div>
+           )}
          </div>
          <div className="flex gap-4 items-center">
            <div className="flex flex-col items-end">

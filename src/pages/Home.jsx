@@ -3,16 +3,23 @@ import { useTranslation } from 'react-i18next';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { EffectCards, Autoplay } from 'swiper/modules';
 import { MapPin, ShieldCheck, ChevronRight, Heart } from 'lucide-react';
+import VerifiedBadge from '../components/VerifiedBadge';
 import 'swiper/css';
 import 'swiper/css/effect-cards';
 
 const Home = ({ setSelectedProfile }) => {
   const { t } = useTranslation();
+
+  // ٹیسٹنگ اور خوبصورتی کے لیے کچھ پروفائلز کو تصدیق شدہ (verified) کر دیا گیا ہے
   const demoProfiles = [
-    { id: 1, name: 'Aisha Khan', age: 24, jobKey: 'doctor', cityKey: 'lahore', img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500', countryKey: 'pakistan' },
-    { id: 2, name: 'Sana Ali', age: 26, jobKey: 'designer', cityKey: 'karachi', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500', countryKey: 'pakistan' },
-    { id: 3, name: 'Maria Nawaz', age: 22, jobKey: 'engineer', cityKey: 'islamabad', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500', countryKey: 'pakistan' },
-    { id: 4, name: 'Zainab Fatima', age: 25, jobKey: 'teacher', cityKey: 'multan', img: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=500', countryKey: 'pakistan' }
+    { id: 1, name: 'Aisha Khan', age: 24, jobKey: 'doctor', cityKey: 'lahore', img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500', countryKey: 'pakistan', verificationStatus: 'verified' },
+    { id: 2, name: 'Sana Ali', age: 26, jobKey: 'designer', cityKey: 'karachi', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500', countryKey: 'pakistan', verificationStatus: 'verified' },
+    { id: 3, name: 'Maria Nawaz', age: 22, jobKey: 'engineer', cityKey: 'islamabad', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500', countryKey: 'pakistan', verificationStatus: 'unverified' },
+    { id: 4, name: 'Zainab Fatima', age: 25, jobKey: 'teacher', cityKey: 'multan', img: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=500', countryKey: 'pakistan', verificationStatus: 'unverified' },
+    { id: 5, name: 'Aisha Khan', age: 24, jobKey: 'doctor', cityKey: 'lahore', img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500', countryKey: 'pakistan', verificationStatus: 'verified' },
+    { id: 6, name: 'Sana Ali', age: 26, jobKey: 'designer', cityKey: 'karachi', img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500', countryKey: 'pakistan', verificationStatus: 'verified' },
+    { id: 7, name: 'Maria Nawaz', age: 22, jobKey: 'engineer', cityKey: 'islamabad', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500', countryKey: 'pakistan', verificationStatus: 'unverified' },
+    { id: 8, name: 'Zainab Fatima', age: 25, jobKey: 'teacher', cityKey: 'multan', img: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=500', countryKey: 'pakistan', verificationStatus: 'unverified' }
   ];
 
   return (
@@ -27,7 +34,11 @@ const Home = ({ setSelectedProfile }) => {
                   <Heart size={16} className="text-white fill-[#D4AF37]" />
                 </div>
                 <div className="absolute inset-x-0 bottom-0 bg-white p-5 m-2 rounded-[35px] shadow-xl text-center border border-gray-50">
-                  <h2 className="text-[#4A0E0E] font-black text-xl tracking-tighter uppercase">{p.name}</h2>
+                  {/* نام کے ساتھ تصدیقی نشان یہاں مرج کیا گیا ہے */}
+                  <h2 className="text-[#4A0E0E] font-black text-xl tracking-tighter uppercase flex items-center justify-center gap-1">
+                    {p.name}
+                    <VerifiedBadge status={p.verificationStatus} />
+                  </h2>
                   <div className="flex flex-col items-center gap-1 mt-1">
                     <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">
                       {t('age')}: <span className="text-[#4A0E0E]">{p.age}</span> • {t('prof')}: <span className="text-[#4A0E0E]">{t(p.jobKey)}</span>
@@ -56,9 +67,15 @@ const Home = ({ setSelectedProfile }) => {
           {demoProfiles.map((p) => (
             <div key={p.id} className="flex flex-col items-center gap-2 flex-shrink-0">
               <div className="relative p-1 rounded-full border-2 border-[#D4AF37] shadow-sm">
-                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white">
+                <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white relative">
                   <img src={p.img} alt={p.name} className="w-full h-full object-cover" />
                 </div>
+                {/* چھوٹی گول تصاویر کے اوپر بھی ہلکا سا بیج شو کرنے کے لیے */}
+                {p.verificationStatus === 'verified' && (
+                  <div className="absolute bottom-0 right-0 transform translate-x-1 translate-y-1 scale-75">
+                    <VerifiedBadge status={p.verificationStatus} />
+                  </div>
+                )}
               </div>
               <span className="text-[10px] font-black text-[#4A0E0E] uppercase">{p.name.split(' ')[0]}</span>
             </div>
@@ -82,4 +99,5 @@ const TrustBadge = ({ label, sub }) => (
     <p className="text-[7px] text-gray-400 font-bold">{sub}</p>
   </div>
 );
+
 export default Home;
