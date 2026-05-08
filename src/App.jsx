@@ -24,7 +24,7 @@ import BlockedProfiles from './pages/BlockedProfiles';
 
 const AppContent = () => {
   const userContext = useUser();
-  const [isAuthenticated, setIsAuthenticated] = useState(false); // لاگ ان اسٹیٹ
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [activeTab, setActiveTab] = useState('home');
   const [currentView, setCurrentView] = useState('main');
@@ -74,25 +74,33 @@ const AppContent = () => {
     }
   }, [userContext]);
 
+  // سفید اسکرین سے بچنے کا مضبوط ڈیفنس گارڈ
   if (!userContext) {
     return (
-      <div className="p-10 text-red-600 bg-red-100 h-screen">
-        <h1 className="font-bold">بیماری مل گئی!</h1>
-        <p>UserContext فراہم نہیں کیا گیا۔ چیک کریں کہ کیا main.jsx میں UserProvider موجود ہے؟</p>
+      <div className="p-10 text-red-600 bg-red-100 h-screen flex flex-col justify-center items-center text-center">
+        <h1 className="font-black text-xl mb-2">معذرت، سسٹم لوڈ نہیں ہو سکا!</h1>
+        <p className="text-xs">UserContext فراہم نہیں کیا گیا۔ چیک کریں کہ کیا main.jsx میں UserProvider موجود ہے؟</p>
       </div>
     );
   }
 
   const { loading, userData } = userContext;
 
-  // اگر صارف لاگ ان نہیں ہے، تو اسے صرف لاگ ان پیج دکھائیں (Auth Gate)
+  // اگر صارف لاگ ان نہیں ہے، تو اسے صرف لاگ ان پیج دکھائیں
   if (!isAuthenticated) {
     return <Login onLoginSuccess={handleLoginSuccess} />;
   }
 
-  // تصدیق کا قانون لاگو کرنے کا مرکزی فنکشن
+  // تصدیق کا قانون لاگو کرنے کا مرکزی فنکشن (سیکیورٹی چیک)
   const requireVerification = (actionCallback) => {
-    const status = userData?.verificationStatus;
+    // اگر ڈیٹا ابھی لوڈ ہو رہا ہو تو الرٹ دیں
+    if (loading) {
+      alert("صارف کا ڈیٹا لوڈ ہو رہا ہے، براہ کرم ایک سیکنڈ انتظار کریں...");
+      return;
+    }
+    
+    // سیکیورٹی فال بیک: اگر userData کسی وجہ سے نل ہو تو اسے غیر تصدیق شدہ مانیں
+    const status = userData?.verificationStatus || 'unverified';
     if (status === 'verified') {
       actionCallback();
     } else {
@@ -163,11 +171,12 @@ const AppContent = () => {
     return null;
   };
 
+  // لوڈنگ انڈیکیٹر (اب یہ سفید سکرین کو روکنے میں مددگار ہے)
   if (loading) {
     return (
       <div className="h-screen flex flex-col items-center justify-center bg-white">
         <div className="w-10 h-10 border-4 border-t-blue-500 rounded-full animate-spin"></div>
-        <p className="mt-4 font-bold text-gray-700">ڈیٹا لوڈ ہو رہا ہے... (اگر یہ پھنس جائے تو فائر بیس کیز چیک کریں)</p>
+        <p className="mt-4 font-bold text-gray-700">پروفائل ڈیٹا لوڈ ہو رہا ہے...</p>
       </div>
     );
   }
