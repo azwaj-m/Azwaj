@@ -1,53 +1,50 @@
-import { useState, useEffect } from 'react';
-// آپ کے فائل ٹری کے مطابق درست پاتھ: src/utils/translator.js
-import { translateBulk } from '../utils/translator';
-import i18n from 'i18next';
+import { useTranslation } from 'react-i18next';
 
-/**
- * سرچ رزلٹس کو خودکار طور پر ترجمہ کرنے والا ہک
- * @param {Array} results - ڈیٹا بیس سے آنے والے پروفائلز کی لسٹ
- * @returns {Object} - ترجمہ شدہ رزلٹس اور لوڈنگ اسٹیٹ
- */
-export const useSearchTranslator = (results) => {
-  const [translatedResults, setTranslatedResults] = useState(results);
-  const [isTranslating, setIsTranslating] = useState(false);
+export const useSearchTranslator = () => {
+  const { t } = useTranslation();
 
-  useEffect(() => {
-    const processTranslations = async () => {
-      // اگر رزلٹس خالی ہوں یا زبان انگلش ہو تو ترجمہ نہ کریں
-      if (!results || results.length === 0 || i18n.language === 'en') {
-        setTranslatedResults(results);
-        return;
-      }
+  // ہر قسم کے ٹیکسٹ کو صاف کرنے کا فنکشن (اعراب، اسپیشل کریکٹرز اور فالتو اسپیسز کا خاتمہ)
+  const normalizeText = (text) => {
+    if (!text) return '';
+    return text
+      .toString()
+      .toLowerCase()
+      // اردو اعراب اور ہندی ڈائیکریٹکس کو ہٹانے کے لیے یونی کوڈ فلٹر
+      .replace(/[\u064B-\u065F\u0670\u093C]/g, '') 
+      .trim();
+  };
 
-      setIsTranslating(true);
+  // ملٹی لینگویج سرچ فلٹر
+  const matchProfile = (profile, searchQuery) => {
+    const query = normalizeText(searchQuery);
+    if (!query) return true;
 
-      try {
-        // 1. وہ فیلڈز نکالیں جن کا ترجمہ ضروری ہے (مثلاً bio، city، یا profession)
-        // یاد رہے کہ مذہب (Religion) جیسی چیزیں i18n.js کے ذریعے ہینڈل ہونی چاہئیں
-        const textsToTranslate = results.map(user => user.bio || "");
+    // پروفائل کے بنیادی ڈیٹا کو نارملائز کرنا
+    const name = normalizeText(profile.name);
+    const age = normalizeText(profile.age);
 
-        // 2. بلک ٹرانسلیٹر کو کال کریں (src/utils/translator.js سے)
-        const translatedBios = await translateBulk(textsToTranslate, i18n.language);
+    // لوکلائزڈ فیلڈز (شہر، ملک اور پیشے کا موجودہ زبان میں ترجمہ)
+    const cityLocal = normalizeText(t(profile.cityKey));
+    const countryLocal = normalizeText(t(profile.countryKey));
+    const jobLocal = normalizeText(t(profile.jobKey));
 
-        // 3. اصل ڈیٹا میں ترجمہ شدہ ٹیکسٹ شامل کریں
-        const finalData = results.map((user, index) => ({
-          ...user,
-          // ایک نیا فیلڈ 'displayBio' بنائیں تاکہ اصل ڈیٹا محفوظ رہے
-          displayBio: translatedBios[index] || user.bio
-        }));
+    // اصل ڈیٹا کیز (تاکہ اگر کوئی براہ راست انگلش کی ورڈ جیسے 'lahore' یا 'doctor' سرچ کرے تو بھی کام کرے)
+    const cityKey = normalizeText(profile.cityKey);
+    const countryKey = normalizeText(profile.countryKey);
+    const jobKey = normalizeText(profile.jobKey);
 
-        setTranslatedResults(finalData);
-      } catch (error) {
-        console.error("Hook Translation Error:", error);
-        setTranslatedResults(results);
-      } finally {
-        setIsTranslating(false);
-      }
-    };
+    // سرچ انڈیکس: ہر وہ ممکنہ لفظ جہاں سے میچنگ کی جا سکتی ہے
+    return (
+      name.includes(query) ||
+      age.includes(query) ||
+      cityLocal.includes(query) ||
+      countryLocal.includes(query) ||
+      jobLocal.includes(query) ||
+      cityKey.includes(query) ||
+      countryKey.includes(query) ||
+      jobKey.includes(query)
+    );
+  };
 
-    processTranslations();
-  }, [results, i18n.language]);
-
-  return { translatedResults, isTranslating };
+  return { matchProfile, normalizeText };
 };
