@@ -3,7 +3,7 @@ import { Home, Heart, MessageCircle, User, Crown, Bell, ShieldCheck } from 'luci
 import { useTranslation } from 'react-i18next';
 import { useUser } from '../context/UserContext';
 
-const BottomNav = ({ activeTab, setActiveTab }) => {
+const BottomNav = ({ activeTab, setActiveTab, setNotificationFilter }) => {
   const { t } = useTranslation();
   const { userData } = useUser();
 
@@ -15,9 +15,17 @@ const BottomNav = ({ activeTab, setActiveTab }) => {
     { id: 'profile', label: 'Profile', icon: User },
   ];
 
+  // کاؤنٹرز پر کلک کرنے کا ہینڈلر جو یوزر کو نوٹیفکیشن پیج پر متعلقہ فلٹر کے ساتھ بھیجے گا
+  const handleStatClick = (filterType) => {
+    setActiveTab('notifications');
+    if (typeof setNotificationFilter === 'function') {
+      setNotificationFilter(filterType);
+    }
+  };
+
   return (
     <div className="fixed bottom-0 left-0 right-0 z-[100] max-w-md mx-auto">
-      {/* مین نیویگیشن بار */}
+      {/* ۱۔ مین نیویگیشن بار */}
       <nav className="bg-[#F5E6D3]/95 backdrop-blur-md py-3 px-2 border-t border-[#D4AF37]/40 flex justify-around items-center rounded-t-[30px] shadow-[0_-8px_25px_rgba(0,0,0,0.15)]">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -43,16 +51,16 @@ const BottomNav = ({ activeTab, setActiveTab }) => {
               }`}>
                 {t(tab.id, tab.label)}
               </span>
-              {isActive && <div className="w-5 h-1 bg-[#4A0E0E] rounded-full mt-0.5"></div>}
+              {isActive && <div className="w-5 h-1 bg-[#4A0E0E] rounded-full mt-0.5 animate-in fade-in zoom-in duration-200"></div>}
             </button>
           );
         })}
       </nav>
 
-      {/* پریمیم اور ویریفیکیشن اسٹیٹس بار */}
-      <div className="bg-[#4A0E0E] py-1.5 px-4 flex justify-between items-center text-[8px] text-white font-black uppercase tracking-widest border-t border-[#D4AF37]/20">
+      {/* ۲۔ پریمیم، ویریفیکیشن اور فعال لوکل اسٹیٹس بار (کلک ایبل کاؤنٹرز کے ساتھ) */}
+      <div className="bg-[#4A0E0E] py-1.5 px-4 flex justify-between items-center text-[8px] text-white font-black uppercase tracking-widest border-t border-[#D4AF37]/20 select-none">
          <div className="flex items-center gap-3">
-           <div className="flex items-center gap-1">
+           <div className="flex items-center gap-1 active:scale-95 transition-transform cursor-pointer">
              <Crown size={12} className="text-[#D4AF37] fill-[#D4AF37]"/>
              <span className="text-[#D4AF37]">Premium</span>
            </div>
@@ -63,21 +71,37 @@ const BottomNav = ({ activeTab, setActiveTab }) => {
              </div>
            )}
          </div>
+         
+         {/* تین لائیو فعال بٹنز جو براہ راست نوٹیفکیشنز سے منسلک ہیں */}
          <div className="flex gap-4 items-center">
-           <div className="flex flex-col items-end">
+           {/* Exclusive بٹن */}
+           <button 
+             onClick={() => handleStatClick('exclusive')}
+             className="flex flex-col items-end active:scale-95 transition-transform hover:text-[#D4AF37] outline-none"
+           >
              <span className="text-[7px] opacity-60">Exclusive</span>
-             <span>25</span>
-           </div>
+             <span className="font-bold text-[10px]">25</span>
+           </button>
            <span className="w-[1px] h-3 bg-white/20"></span>
-           <div className="flex flex-col items-end">
+           
+           {/* Inprogress بٹن */}
+           <button 
+             onClick={() => handleStatClick('inprogress')}
+             className="flex flex-col items-end active:scale-95 transition-transform hover:text-[#D4AF37] outline-none"
+           >
              <span className="text-[7px] opacity-60">Inprogress</span>
-             <span>12</span>
-           </div>
+             <span className="font-bold text-[10px]">12</span>
+           </button>
            <span className="w-[1px] h-3 bg-white/20"></span>
-           <div className="flex flex-col items-end">
+           
+           {/* Viewed بٹن */}
+           <button 
+             onClick={() => handleStatClick('viewed')}
+             className="flex flex-col items-end active:scale-95 transition-transform hover:text-[#D4AF37] outline-none"
+           >
              <span className="text-[7px] opacity-60">Viewed</span>
-             <span>88</span>
-           </div>
+             <span className="font-bold text-[10px]">88</span>
+           </button>
          </div>
       </div>
     </div>
