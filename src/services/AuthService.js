@@ -9,42 +9,44 @@ import {
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
 export const AuthService = {
-  // ۱۔ گوگل پرووائیڈر انیشیالائز کرنا
   googleProvider: new GoogleAuthProvider(),
 
-  // ۲۔ گوگل کے ذریعے لاگ ان/سائن اپ کرنا
   loginWithGoogle: async () => {
     try {
       const result = await signInWithPopup(auth, AuthService.googleProvider);
       const user = result.user;
 
-      // فائر اسٹور میں چیک کریں کہ کیا یوزر کا ڈیٹا پہلے سے موجود ہے
       const userDocRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userDocRef);
+
+      // اگر گوگل پروفائل تصویر نہ ہو تو یہ ڈیفالٹ تصویر استعمال ہوگی
+      const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
       let userData = {
         uid: user.uid,
         displayName: user.displayName || "صارف",
         email: user.email || "",
         phoneNumber: user.phoneNumber || "",
-        photoURL: user.photoURL || "",
+        photoURL: user.photoURL || defaultAvatar,
         verificationStatus: 'verified',
         createdAt: new Date().toISOString()
       };
 
       if (!userDoc.exists()) {
-        // نیا صارف ہے تو ڈیٹا فائر اسٹور میں محفوظ کریں
         await setDoc(userDocRef, userData);
       } else {
-        // پرانا صارف ہے تو سیشن ڈیٹا حاصل کریں
         userData = userDoc.data();
+        // اگر پرانے ڈیٹا میں تصویر کا لنک خراب ہے تو اسے ٹھیک کریں
+        if (!userData.photoURL) {
+          userData.photoURL = defaultAvatar;
+        }
       }
 
-      // لوکل سیشن محفوظ کریں
       localStorage.setItem('user_session', JSON.stringify({ 
         uid: userData.uid, 
         phoneNumber: userData.phoneNumber, 
-        displayName: userData.displayName 
+        displayName: userData.displayName,
+        photoURL: userData.photoURL
       }));
 
       return userData;
@@ -54,7 +56,6 @@ export const AuthService = {
     }
   },
 
-  // ۳۔ ری کیپچا ویریفائر سیٹ اپ
   setupRecaptcha: (containerId) => {
     if (!window.recaptchaVerifier) {
       const container = document.getElementById(containerId);
@@ -64,15 +65,11 @@ export const AuthService = {
         size: 'invisible',
         callback: (response) => {
           console.log("Recaptcha resolved");
-        },
-        'expired-callback': () => {
-          console.log("Recaptcha expired");
         }
       });
     }
   },
 
-  // ۴۔ چیک کریں کہ نمبر پہلے سے رجسٹرڈ تو نہیں
   checkIfPhoneExists: async (phoneNumber) => {
     try {
       const usersRef = collection(db, "users");
@@ -80,52 +77,44 @@ export const AuthService = {
       const querySnapshot = await getDocs(q);
       return !querySnapshot.empty;
     } catch (error) {
-      console.error("Check Phone Error:", error);
-      throw new Error("نمبر کی تصدیق کے دوران خرابی پیش آئی۔");
+      return false;
     }
   },
 
-  // ۵۔ موبائل پر OTP کوڈ بھیجنا
   sendOTP: async (phoneNumber) => {
     try {
       const appVerifier = window.recaptchaVerifier;
-      if (!appVerifier) {
-        throw new Error("سیکیورٹی ویریفکیشن سسٹم تیار نہیں ہے۔ پیج ریفریش کریں۔");
-      }
+      if (!appVerifier) throw new Error("سیکیورٹی ویریفکیشن فعال نہیں ہو سکی۔");
       const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
       window.confirmationResult = confirmationResult;
       return true;
     } catch (error) {
-      console.error("OTP Sending Error:", error);
       throw new Error(error.message || "او ٹی پی بھیجنے میں دشواری پیش آئی۔");
     }
   },
 
-  // ۶۔ OTP کوڈ کی تصدیق کرنا
   verifyOTP: async (otpCode) => {
     try {
       const confirmationResult = window.confirmationResult;
-      if (!confirmationResult) {
-        throw new Error("او ٹی پی سیشن ختم ہو چکا ہے۔ دوبارہ کوشش کریں۔");
-      }
+      if (!confirmationResult) throw new Error("او ٹی پی کا سیشن ختم ہو چکا ہے۔");
       const result = await confirmationResult.confirm(otpCode);
       return result.user;
     } catch (error) {
-      console.error("OTP Verification Error:", error);
       throw new Error("درج کردہ تصدیقی کوڈ غلط ہے۔");
     }
   },
 
-  // ۷۔ فائر سٹور میں موبائل نمبر والے صارف کا ریکارڈ بنانا / اپ ڈیٹ کرنا
   saveUserToFirestore: async (user, additionalData = {}) => {
     try {
-      if (!user) throw new Error("صارف کا عارضی سیشن دستیاب نہیں ہے۔");
+      if (!user) throw new Error("صارف دستیاب نہیں ہے۔");
       const userDocRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userDocRef);
+      const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
       let userData = {
         uid: user.uid,
         phoneNumber: user.phoneNumber,
+        photoURL: defaultAvatar,
         verificationStatus: 'verified',
         createdAt: new Date().toISOString(),
         ...additionalData
@@ -141,16 +130,15 @@ export const AuthService = {
       localStorage.setItem('user_session', JSON.stringify({ 
         uid: user.uid, 
         phoneNumber: user.phoneNumber, 
-        displayName: userData.displayName 
+        displayName: userData.displayName,
+        photoURL: userData.photoURL
       }));
       return userData;
     } catch (error) {
-      console.error("Save User Info Error:", error);
-      throw new Error("پروفائل ڈیٹا بیس میں محفوظ نہیں ہو سکی۔");
+      throw new Error("ڈیٹا بیس میں ریکارڈ محفوظ نہیں ہو سکا۔");
     }
   },
 
-  // ۸۔ موبائل نمبر اور پاس ورڈ سے لاگ ان
   loginWithPhoneAndPassword: async (phoneNumber, password) => {
     try {
       const usersRef = collection(db, "users");
@@ -167,34 +155,33 @@ export const AuthService = {
       });
 
       if (foundUser && foundUser.customPassword === password) {
-        const sessionUser = { uid: foundUser.uid, phoneNumber: foundUser.phoneNumber, displayName: foundUser.displayName };
+        const sessionUser = { 
+          uid: foundUser.uid, 
+          phoneNumber: foundUser.phoneNumber, 
+          displayName: foundUser.displayName,
+          photoURL: foundUser.photoURL || "https://cdn-icons-png.flaticon.com/512/149/149071.png"
+        };
         localStorage.setItem('user_session', JSON.stringify(sessionUser));
         return foundUser;
       } else {
         throw new Error("درج کردہ پاس ورڈ غلط ہے۔");
       }
     } catch (error) {
-      console.error("Login Query Error:", error);
       throw new Error(error.message || "لاگ ان کے دوران خرابی پیش آئی۔");
     }
   },
 
-  // ۹۔ لوکل سیشن چیکر
   checkSessionValidity: () => {
     const session = localStorage.getItem('user_session');
-    if (session) {
-      return JSON.parse(session);
-    }
-    return null;
+    return session ? JSON.parse(session) : null;
   },
 
-  // ۱۰۔ لاگ آؤٹ
   logout: async () => {
     try {
       await signOut(auth);
       localStorage.removeItem('user_session');
     } catch (error) {
-      console.error("Logout Error:", error);
+      console.error(error);
     }
   }
 };
