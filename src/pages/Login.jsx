@@ -5,19 +5,23 @@ import { AuthService } from '../services/AuthService';
 const Login = ({ onLoginSuccess }) => {
   const [authMode, setAuthMode] = useState('phone_login'); // Modes: 'phone_login', 'signup_otp', 'verify_otp', 'set_profile'
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [countryCode, setCountryCode] = useState('+92'); // ڈیفالٹ پاکستان
+  const [countryCode, setCountryCode] = useState('+92');
   const [password, setPassword] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [fullName, setFullName] = useState('');
   const [tempUser, setTempUser] = useState(null);
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [message, setMessage] = useState('');
 
-  // ری کیپچا لوڈ کرنا
+  // ری کیپچا لوڈ کرنا (بغیر کسی کریش کے)
   useEffect(() => {
-    AuthService.setupRecaptcha('recaptcha-container');
+    try {
+      AuthService.setupRecaptcha('recaptcha-container');
+    } catch (err) {
+      console.error("Recaptcha initialization failed:", err);
+    }
   }, []);
 
   const getFullPhoneNumber = () => {
@@ -57,7 +61,7 @@ const Login = ({ onLoginSuccess }) => {
     try {
       const fullPhone = getFullPhoneNumber();
       await AuthService.sendOTP(fullPhone);
-      setMessage('آپ کے نمبر پر تصدیقی کوڈ بھیج دیا گیا ہے۔');
+      setMessage('تصدیقی کوڈ بھیج دیا گیا ہے۔');
       setAuthMode('verify_otp');
     } catch (err) {
       setError(err.message || 'OTP کوڈ بھیجنے میں ناکامی۔ انٹرنیٹ چیک کریں۔');
@@ -78,7 +82,6 @@ const Login = ({ onLoginSuccess }) => {
     try {
       const firebaseUser = await AuthService.verifyOTP(otpCode);
       setTempUser(firebaseUser);
-      // تصدیق کامیاب ہونے کے بعد، صارف کو اپنا نام اور پاس ورڈ سیٹ کرنے دیں
       setAuthMode('set_profile');
     } catch (err) {
       setError(err.message || 'کوڈ کی تصدیق ناکام رہی۔');
@@ -103,7 +106,7 @@ const Login = ({ onLoginSuccess }) => {
     try {
       const fullUserData = await AuthService.saveUserToFirestore(tempUser, {
         displayName: fullName,
-        customPassword: password, // پاس ورڈ کو کلاؤڈ ویلیڈیشن کے لیے محفوظ کریں
+        customPassword: password,
       });
       onLoginSuccess(fullUserData);
     } catch (err) {
@@ -116,8 +119,8 @@ const Login = ({ onLoginSuccess }) => {
   return (
     <div className="max-w-md mx-auto h-screen bg-[#3D0A0A] flex flex-col justify-between px-6 py-10 relative overflow-hidden" dir="rtl">
       
-      {/* ری کیپچا کے لیے پوشیدہ کنٹینر */}
-      <div id="recaptcha-container" className="hidden"></div>
+      {/* فائر بیس ری کیپچا کے لیے ضروری پینل (جو پوشیدہ ہے لیکن DOM میں رینڈر ہوتا ہے) */}
+      <div id="recaptcha-container" style={{ display: 'none' }}></div>
 
       {/* ۱۔ اوپری برانڈنگ ایریا */}
       <div className="flex flex-col items-center text-center mt-4 z-10">
@@ -131,7 +134,6 @@ const Login = ({ onLoginSuccess }) => {
       {/* ۲۔ مرکزی فارم کنٹرولر */}
       <div className="w-full bg-white/5 backdrop-blur-md rounded-[35px] border border-white/10 p-6 shadow-2xl z-10 my-auto">
         
-        {/* ٹائٹل مینیجر */}
         <h2 className="text-white text-lg font-black mb-4 text-right">
           {authMode === 'phone_login' && 'موبائل نمبر سے لاگ ان کریں'}
           {authMode === 'signup_otp' && 'موبائل سے نیا اکاؤنٹ بنائیں'}
@@ -158,13 +160,13 @@ const Login = ({ onLoginSuccess }) => {
               <select 
                 value={countryCode} 
                 onChange={(e) => setCountryCode(e.target.value)}
-                className="bg-[#F5E6D3]/10 border-2 border-white/10 rounded-2xl px-2 text-white text-xs font-bold outline-none focus:border-[#D4AF37]"
+                className="bg-[#3D0A0A] border-2 border-white/10 rounded-2xl px-2 text-white text-xs font-bold outline-none focus:border-[#D4AF37]"
               >
-                <option value="+92" className="bg-[#3D0A0A]">🇵🇰 +92</option>
-                <option value="+91" className="bg-[#3D0A0A]">🇮🇳 +91</option>
-                <option value="+966" className="bg-[#3D0A0A]">🇸🇦 +966</option>
-                <option value="+971" className="bg-[#3D0A0A]">🇦🇪 +971</option>
-                <option value="+44" className="bg-[#3D0A0A]">🇬🇧 +44</option>
+                <option value="+92">🇵🇰 +92</option>
+                <option value="+91">🇮🇳 +91</option>
+                <option value="+966">🇸🇦 +966</option>
+                <option value="+971">🇦🇪 +971</option>
+                <option value="+44">🇬🇧 +44</option>
               </select>
               <div className="relative flex-1">
                 <input
@@ -216,13 +218,13 @@ const Login = ({ onLoginSuccess }) => {
               <select 
                 value={countryCode} 
                 onChange={(e) => setCountryCode(e.target.value)}
-                className="bg-[#F5E6D3]/10 border-2 border-white/10 rounded-2xl px-2 text-white text-xs font-bold outline-none focus:border-[#D4AF37]"
+                className="bg-[#3D0A0A] border-2 border-white/10 rounded-2xl px-2 text-white text-xs font-bold outline-none focus:border-[#D4AF37]"
               >
-                <option value="+92" className="bg-[#3D0A0A]">🇵🇰 +92</option>
-                <option value="+91" className="bg-[#3D0A0A]">🇮🇳 +91</option>
-                <option value="+966" className="bg-[#3D0A0A]">🇸🇦 +966</option>
-                <option value="+971" className="bg-[#3D0A0A]">🇦🇪 +971</option>
-                <option value="+44" className="bg-[#3D0A0A]">🇬🇧 +44</option>
+                <option value="+92">🇵🇰 +92</option>
+                <option value="+91">🇮🇳 +91</option>
+                <option value="+966">🇸🇦 +966</option>
+                <option value="+971">🇦🇪 +971</option>
+                <option value="+44">🇬🇧 +44</option>
               </select>
               <div className="relative flex-1">
                 <input
