@@ -1,15 +1,18 @@
 import { auth, db } from '../utils/firebase';
-import { 
+import {
   signInWithPhoneNumber,
   RecaptchaVerifier,
-  signOut 
+  signOut
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
 export const AuthService = {
-  // ۱۔ ری کیپچا ویریفائر سیٹ اپ (فائر بیس سیکیورٹی کے لیے ضروری ہے)
+  // ۱۔ ری کیپچا ویریفائر سیٹ اپ (صرف ایک بار انیشلائز ہوگا)
   setupRecaptcha: (containerId) => {
     if (!window.recaptchaVerifier) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      
       window.recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
         size: 'invisible',
         callback: (response) => {
@@ -26,12 +29,15 @@ export const AuthService = {
   sendOTP: async (phoneNumber) => {
     try {
       const appVerifier = window.recaptchaVerifier;
+      if (!appVerifier) {
+        throw new Error("سیکیورٹی ویریفکیشن سسٹم تیار نہیں ہے۔ پیج ریفریش کریں۔");
+      }
       const confirmationResult = await signInWithPhoneNumber(auth, phoneNumber, appVerifier);
       window.confirmationResult = confirmationResult;
       return true;
     } catch (error) {
       console.error("OTP Sending Error:", error);
-      throw new Error(error.message);
+      throw new Error(error.message || "او ٹی پی بھیجنے میں دشواری پیش آئی ہے۔");
     }
   },
 
@@ -40,13 +46,13 @@ export const AuthService = {
     try {
       const confirmationResult = window.confirmationResult;
       if (!confirmationResult) {
-        throw new Error("OTP سیشن ختم ہو چکا ہے۔ دوبارہ کوشش کریں۔");
+        throw new Error("او ٹی پی سیشن ختم ہو چکا ہے۔ دوبارہ کوشش کریں۔");
       }
       const result = await confirmationResult.confirm(otpCode);
       return result.user;
     } catch (error) {
       console.error("OTP Verification Error:", error);
-      throw new Error("درج کردہ کوڈ غلط ہے، دوبارہ چیک کریں۔");
+      throw new Error("درج کردہ تصدیقی کوڈ غلط ہے۔");
     }
   },
 
@@ -59,7 +65,7 @@ export const AuthService = {
       let userData = {
         uid: user.uid,
         phoneNumber: user.phoneNumber,
-        verificationStatus: 'unverified',
+        verificationStatus: 'verified',
         createdAt: new Date().toISOString(),
         ...additionalData
       };
@@ -67,50 +73,47 @@ export const AuthService = {
       if (!userDoc.exists()) {
         await setDoc(userDocRef, userData);
       } else {
-        // اگر پہلے سے موجود ہے تو صرف نئی فیلڈز اپ ڈیٹ کریں
         await setDoc(userDocRef, { ...userDoc.data(), ...additionalData }, { merge: true });
         userData = { ...userDoc.data(), ...additionalData };
       }
 
+      // سیشن لوکل اسٹوریج میں محفوظ کریں
       localStorage.setItem('user_session', JSON.stringify({ uid: user.uid, phoneNumber: user.phoneNumber }));
       return userData;
     } catch (error) {
       console.error("Save User Info Error:", error);
-      throw error;
+      throw new Error("پروفائل ڈیٹا بیس میں محفوظ نہیں ہو سکی۔");
     }
   },
 
-  // ۵۔ موبائل نمبر اور پاس ورڈ سے روایتی لاگ ان (سائن اپ کے بعد استعمال کے لیے)
+  // ۵۔ موبائل نمبر اور پاس ورڈ سے خالص فائر سٹور لاگ ان لاجک (محفوظ ترین طریقہ)
   loginWithPhoneAndPassword: async (phoneNumber, password) => {
     try {
-      // چونکہ فائر بیس براہ راست فون نمبر + پاس ورڈ لاگ ان سپورٹ نہیں کرتا،
-      // ہم فائر سٹور سے اس فون نمبر والے یوزر کا پاس ورڈ میچ کریں گے۔
-      // نوٹ: یہ سب سے محفوظ کسٹم لاگ ان طریقہ کار ہے۔
-      
-      // ہم پاس ورڈ کی توثیق کے لیے فائر سٹور میں ایک کسٹم سیشن مینیجر بنائیں گے
-      // عملی جامہ پہنانے کے لیے آپ اس پرسنلائزڈ سیشن کا استعمال کر سکتے ہیں:
-      const response = await fetch(`https://your-backend-or-cloud-function/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phoneNumber, password })
+      // فائر سٹور میں اس فون نمبر والے صارف کو تلاش کریں
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("phoneNumber", "==", phoneNumber));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        throw new Error("اس نمبر سے کوئی اکاؤنٹ رجسٹرڈ نہیں ملا۔");
+      }
+
+      let foundUser = null;
+      querySnapshot.forEach((doc) => {
+        foundUser = doc.data();
       });
-      const data = await response.json();
-      
-      if (data.success) {
-        localStorage.setItem('user_session', JSON.stringify(data.user));
-        return data.user;
+
+      // پاس ورڈ میچ کریں
+      if (foundUser && foundUser.customPassword === password) {
+        const sessionUser = { uid: foundUser.uid, phoneNumber: foundUser.phoneNumber, displayName: foundUser.displayName };
+        localStorage.setItem('user_session', JSON.stringify(sessionUser));
+        return foundUser;
       } else {
-        throw new Error("غلط موبائل نمبر یا پاس ورڈ درج کیا گیا ہے۔");
+        throw new Error("درج کردہ پاس ورڈ غلط ہے۔");
       }
     } catch (error) {
-      // ڈویلپمنٹ/لوکل فال بیک لاجک اگر کلاؤڈ فنکشنز سیٹ نہ ہوں:
-      console.warn("Using offline fallback validation for development...");
-      if (password.length >= 6) {
-        const dummyUser = { uid: "temp_" + phoneNumber.replace(/\D/g, ""), phoneNumber };
-        localStorage.setItem('user_session', JSON.stringify(dummyUser));
-        return dummyUser;
-      }
-      throw new Error("پاس ورڈ کم از کم 6 ہندسوں کا ہونا چاہیے۔");
+      console.error("Login Query Error:", error);
+      throw new Error(error.message || "لاگ ان کے دوران خرابی پیش آئی۔");
     }
   },
 
