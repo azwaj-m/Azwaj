@@ -55,10 +55,20 @@ const Login = ({ onLoginSuccess }) => {
     }
     setLoading(true);
     setError('');
+    setMessage('');
     try {
       const fullPhone = getFullPhoneNumber();
+      
+      // سیکیورٹی چیک: کیا یہ نمبر پہلے سے موجود ہے؟
+      const exists = await AuthService.checkIfPhoneExists(fullPhone);
+      if (exists) {
+        setError('یہ موبائل نمبر پہلے ہی رجسٹرڈ ہے۔ براہ کرم لاگ ان کریں۔');
+        setLoading(false);
+        return;
+      }
+
       await AuthService.sendOTP(fullPhone);
-      setMessage('تصدیقی کوڈ بھیج دیا گیا ہے۔');
+      setMessage('تصدیقی کوڈ کامیابی کے ساتھ آپ کے نمبر پر بھیج دیا گیا ہے۔');
       setAuthMode('verify_otp');
     } catch (err) {
       setError(err.message || 'OTP کوڈ بھیجنے میں ناکامی۔');
@@ -114,10 +124,8 @@ const Login = ({ onLoginSuccess }) => {
   return (
     <div className="w-full min-h-screen bg-[#3D0A0A] flex flex-col justify-center items-center px-4 py-8 relative overflow-hidden" dir="rtl">
       
-      {/* Invisible Recaptcha container */}
       <div id="recaptcha-container" style={{ display: 'none' }}></div>
 
-      {/* ۱۔ خوبصورت اور بڑا برانڈنگ لوگو */}
       <div className="flex flex-col items-center text-center mb-8 z-10">
         <div className="bg-gradient-to-br from-[#D4AF37] to-[#AA8928] p-4 rounded-[28px] rotate-6 shadow-2xl mb-4 border border-white/20">
           <img src="/images/Logo.png" className="w-16 h-16 object-contain brightness-110" alt="Azwaj Logo" />
@@ -126,7 +134,6 @@ const Login = ({ onLoginSuccess }) => {
         <p className="text-[10px] font-bold text-[#D4AF37]/80 tracking-[0.2em] uppercase mt-1">سنجیدہ رشتوں کا پلیٹ فارم</p>
       </div>
 
-      {/* ۲۔ فکسڈ اور مناسب سائز کا مرکزی فارم کارڈ */}
       <div className="w-full max-w-[360px] bg-white/5 backdrop-blur-md rounded-[30px] border border-white/10 p-6 shadow-2xl z-10">
         
         <h2 className="text-white text-base font-black mb-5 text-right">
@@ -148,7 +155,6 @@ const Login = ({ onLoginSuccess }) => {
           </div>
         )}
 
-        {/* فارم ۱: موبائل نمبر اور پاس ورڈ لاگ ان */}
         {authMode === 'phone_login' && (
           <form onSubmit={handlePhonePasswordLogin} className="space-y-4">
             <div className="flex gap-2">
@@ -199,14 +205,13 @@ const Login = ({ onLoginSuccess }) => {
 
             <p className="text-center text-white/50 text-xs mt-3">
               اکاؤنٹ نہیں ہے؟{' '}
-              <button type="button" onClick={() => setAuthMode('signup_otp')} className="text-[#D4AF37] font-black underline">
+              <button type="button" onClick={() => { setAuthMode('signup_otp'); setError(''); setMessage(''); }} className="text-[#D4AF37] font-black underline">
                 نیا اکاؤنٹ بنائیں
               </button>
             </p>
           </form>
         )}
 
-        {/* فارم ۲: بذریعہ ایس ایم ایس او ٹی پی سائن اپ */}
         {authMode === 'signup_otp' && (
           <form onSubmit={handleSendOTP} className="space-y-4">
             <div className="flex gap-2">
@@ -239,20 +244,19 @@ const Login = ({ onLoginSuccess }) => {
               disabled={loading}
               className="w-full bg-gradient-to-r from-[#D4AF37] to-[#AA8928] text-[#3D0A0A] font-black text-sm py-3 rounded-2xl shadow-xl flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50"
             >
-              {loading ? 'کوڈ بھیجا جا رہا ہے...' : 'بذریعہ SMS کوڈ حاصل کریں'}
+              {loading ? 'تصدیق جاری ہے...' : 'بذریعہ SMS کوڈ حاصل کریں'}
               <ArrowRight size={14} className="rotate-180" />
             </button>
 
             <p className="text-center text-white/50 text-xs mt-3">
               پہلے سے اکاؤنٹ ہے؟{' '}
-              <button type="button" onClick={() => setAuthMode('phone_login')} className="text-[#D4AF37] font-black underline">
+              <button type="button" onClick={() => { setAuthMode('phone_login'); setError(''); setMessage(''); }} className="text-[#D4AF37] font-black underline">
                 لاگ ان کریں
               </button>
             </p>
           </form>
         )}
 
-        {/* فارم ۳: او ٹی پی کی تصدیق */}
         {authMode === 'verify_otp' && (
           <form onSubmit={handleVerifyOTP} className="space-y-4">
             <div className="relative">
@@ -277,7 +281,6 @@ const Login = ({ onLoginSuccess }) => {
           </form>
         )}
 
-        {/* فارم ۴: نام اور پاس ورڈ سیٹ کرنا */}
         {authMode === 'set_profile' && (
           <form onSubmit={handleCompleteProfile} className="space-y-4">
             <div className="relative">
@@ -316,7 +319,6 @@ const Login = ({ onLoginSuccess }) => {
 
       </div>
 
-      {/* ۳۔ خوبصورت نچلی سیفٹی پٹی */}
       <div className="flex items-center justify-center gap-1.5 text-[10px] font-bold text-white/40 z-10 mt-8">
         <Shield size={12} className="text-[#D4AF37]" />
         <span>محفوظ ترین، 100% تصدیق شدہ اور خاندانی ماحول</span>

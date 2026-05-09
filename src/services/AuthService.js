@@ -7,12 +7,12 @@ import {
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 
 export const AuthService = {
-  // ۱۔ ری کیپچا ویریفائر سیٹ اپ (صرف ایک بار انیشلائز ہوگا)
+  // ۱۔ ری کیپچا ویریفائر سیٹ اپ
   setupRecaptcha: (containerId) => {
     if (!window.recaptchaVerifier) {
       const container = document.getElementById(containerId);
       if (!container) return;
-      
+
       window.recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
         size: 'invisible',
         callback: (response) => {
@@ -25,7 +25,20 @@ export const AuthService = {
     }
   },
 
-  // ۲۔ موبائل پر OTP کوڈ بھیجنا
+  // ۲۔ چیک کریں کہ نمبر پہلے سے رجسٹرڈ تو نہیں
+  checkIfPhoneExists: async (phoneNumber) => {
+    try {
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("phoneNumber", "==", phoneNumber));
+      const querySnapshot = await getDocs(q);
+      return !querySnapshot.empty; // اگر خالی نہیں ہے تو اس کا مطلب ہے نمبر پہلے سے موجود ہے
+    } catch (error) {
+      console.error("Check Phone Error:", error);
+      throw new Error("نمبر کی تصدیق کے دوران خرابی پیش آئی۔");
+    }
+  },
+
+  // ۳۔ موبائل پر OTP کوڈ بھیجنا
   sendOTP: async (phoneNumber) => {
     try {
       const appVerifier = window.recaptchaVerifier;
@@ -41,7 +54,7 @@ export const AuthService = {
     }
   },
 
-  // ۳۔ OTP کوڈ کی تصدیق کرنا
+  // ۴۔ OTP کوڈ کی تصدیق کرنا
   verifyOTP: async (otpCode) => {
     try {
       const confirmationResult = window.confirmationResult;
@@ -56,9 +69,10 @@ export const AuthService = {
     }
   },
 
-  // ۴۔ فائر سٹور میں موبائل نمبر والے صارف کا ریکارڈ بنانا / اپ ڈیٹ کرنا
+  // ۵۔ فائر سٹور میں موبائل نمبر والے صارف کا ریکارڈ بنانا / اپ ڈیٹ کرنا
   saveUserToFirestore: async (user, additionalData = {}) => {
     try {
+      if (!user) throw new Error("صارف کا عارضی سیشن دستیاب نہیں ہے۔");
       const userDocRef = doc(db, "users", user.uid);
       const userDoc = await getDoc(userDocRef);
 
@@ -78,7 +92,7 @@ export const AuthService = {
       }
 
       // سیشن لوکل اسٹوریج میں محفوظ کریں
-      localStorage.setItem('user_session', JSON.stringify({ uid: user.uid, phoneNumber: user.phoneNumber }));
+      localStorage.setItem('user_session', JSON.stringify({ uid: user.uid, phoneNumber: user.phoneNumber, displayName: userData.displayName }));
       return userData;
     } catch (error) {
       console.error("Save User Info Error:", error);
@@ -86,10 +100,9 @@ export const AuthService = {
     }
   },
 
-  // ۵۔ موبائل نمبر اور پاس ورڈ سے خالص فائر سٹور لاگ ان لاجک (محفوظ ترین طریقہ)
+  // ۶۔ موبائل نمبر اور پاس ورڈ سے لاگ ان
   loginWithPhoneAndPassword: async (phoneNumber, password) => {
     try {
-      // فائر سٹور میں اس فون نمبر والے صارف کو تلاش کریں
       const usersRef = collection(db, "users");
       const q = query(usersRef, where("phoneNumber", "==", phoneNumber));
       const querySnapshot = await getDocs(q);
@@ -103,7 +116,6 @@ export const AuthService = {
         foundUser = doc.data();
       });
 
-      // پاس ورڈ میچ کریں
       if (foundUser && foundUser.customPassword === password) {
         const sessionUser = { uid: foundUser.uid, phoneNumber: foundUser.phoneNumber, displayName: foundUser.displayName };
         localStorage.setItem('user_session', JSON.stringify(sessionUser));
@@ -117,7 +129,7 @@ export const AuthService = {
     }
   },
 
-  // ۶۔ لوکل سیشن چیکر
+  // ۷۔ لوکل سیشن چیکر
   checkSessionValidity: () => {
     const session = localStorage.getItem('user_session');
     if (session) {
@@ -126,7 +138,7 @@ export const AuthService = {
     return null;
   },
 
-  // ۷۔ لاگ آؤٹ
+  // ۸۔ لاگ آؤٹ
   logout: async () => {
     try {
       await signOut(auth);
