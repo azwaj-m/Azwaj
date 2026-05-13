@@ -11,6 +11,7 @@ import Home from './pages/Home';
 import Discover from './pages/Discover';
 import Chat from './pages/Chat';
 import Notifications from './pages/Notifications';
+import ProfileManager from './pages/ProfileManager';
 import Profile from './pages/Profile'; 
 import Subscription from './pages/Subscription';
 import PrivacySettings from './pages/PrivacySettings';
@@ -90,9 +91,8 @@ const App = () => {
         case 'notifications':
           return <Notifications setActiveTab={setActiveTab} setCurrentView={setCurrentView} />;
         case 'profile':
-          // اگر ProfileManager غائب ہے تو ہم براہِ راست تفصیلی Profile.jsx پیج لوڈ کریں گے تاکہ کریش نہ ہو
-          return <Profile onBack={() => setActiveTab('home')} />;
-        default:
+            return <ProfileManager onNavigate={(tab) => setActiveTab(tab)} setCurrentView={setCurrentView} />;
+          default:
           return <Home profiles={filteredProfiles} setSelectedProfile={setSelectedProfile} />;
       }
     }
