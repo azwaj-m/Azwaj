@@ -20,21 +20,19 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
       const reader = new FileReader();
       reader.onloadend = () => {
         if (updateProfile) {
-          updateProfile(userData.name, reader.result);
+          updateProfile(userData?.name, reader.result);
         }
       };
       reader.readAsDataURL(file);
     }
   };
 
-  // 👑 سنٹرل برین (App.jsx) کے نئے ایکشنز کے مطابق مینو آئٹمز کی میپنگ اور ایکٹیویشن
   const menuItems = [
     { 
       id: 'profile', 
       label: 'میری پروفائل', 
       icon: User, 
       action: () => {
-        // App.jsx میں جا کر 'profile' مینیجر ٹیب اوپن کرے گا
         onAction('main'); 
         setTimeout(() => window.dispatchEvent(new CustomEvent('switch-tab', { detail: 'profile' })), 50);
       } 
@@ -52,7 +50,7 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
       label: 'پرائیویسی سیٹنگز', 
       icon: Shield, 
       action: () => {
-        onAction('profile'); // پروفائل مینیجر ہینڈلر کو ٹرگر کرے گا
+        onAction('profile'); 
       } 
     },
     { 
@@ -69,7 +67,6 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
       label: 'بلاک شدہ لسٹ', 
       icon: ShieldAlert, 
       action: () => {
-        // بلاک لسٹ کے پریمیم ویو کو سوئچ کرنے کا کنٹرولر
         onAction('main');
         setTimeout(() => window.dispatchEvent(new CustomEvent('switch-tab', { detail: 'profile' })), 50);
       } 
@@ -92,7 +89,6 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
 
   return (
     <>
-      {/* اوورلے (بیک ڈراپ بلر کے ساتھ) */}
       {isOpen && (
         <div
           className="fixed inset-0 bg-black/60 z-[150] backdrop-blur-xs transition-opacity duration-300"
@@ -100,10 +96,8 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
         />
       )}
 
-      {/* مینو دراز (Drawer) */}
       <div className={`fixed top-0 ${isRTL ? 'right-0' : 'left-0'} h-full w-72 bg-[#FFFDF9] z-[200] transform transition-transform duration-300 flex flex-col border-[#D4AF37]/10 shadow-2xl ${isRTL ? (isOpen ? 'translate-x-0' : 'translate-x-full') : (isOpen ? 'translate-x-0' : '-translate-x-full')}`}>
 
-        {/* 👑 شاہی ہیڈر مع اوتار اپلوڈر */}
         <div className="bg-gradient-to-b from-[#4A0E0E] to-[#3D0A0A] p-6 text-center relative flex-shrink-0 rounded-b-[30px] border-b border-[#D4AF37]/20 shadow-lg">
           <button type="button" onClick={onClose} className={`absolute top-4 ${isRTL ? 'left-4' : 'right-4'} text-[#D4AF37] p-1.5 hover:bg-white/10 rounded-full transition-all active:scale-90`}>
             <X size={20} />
@@ -120,7 +114,6 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
             </div>
           </div>
           
-          {/* نام اور پریمیم بیج */}
           <h2 className="text-[#D4AF37] mt-3 text-lg font-black tracking-tight flex items-center justify-center gap-1">
             {userData?.name || "شاہ زیب خان"}
             <VerifiedBadge status={userData?.verificationStatus || 'verified'} />
@@ -130,7 +123,6 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
           </p>
         </div>
 
-        {/* 📜 مینیو لنکس اسکرول ایریا */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-1.5 no-scrollbar">
           {menuItems.map((item) => (
             <button
@@ -150,7 +142,6 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
             </button>
           ))}
 
-          {/* زبان تبدیل کرنے کا بٹن */}
           <button
             type="button"
             onClick={() => setIsLangModalOpen(true)}
@@ -167,7 +158,6 @@ const Sidebar = ({ isOpen, onClose, onAction, onEditProfile }) => {
           </button>
         </div>
 
-        {/* 🚪 لاگ آؤٹ اور ورژن بار */}
         <div className="bg-[#FFFDF9] border-t border-gray-100 p-5 text-center flex-shrink-0">
            <button 
              type="button"
