@@ -8,16 +8,34 @@ import VerifiedBadge from '../components/VerifiedBadge';
 import 'swiper/css';
 import 'swiper/css/effect-cards';
 
-const Home = ({ setSelectedProfile }) => {
+const Home = ({ setSelectedProfile, onAction }) => {
   const { t, i18n } = useTranslation();
   
-  // گلوبل سرچ کانٹیکسٹ سے ڈیٹا اور سرچ اسٹیٹ حاصل کریں
+  // گلوبل سرچ کانٹیکسٹ سے ڈیٹا حاصل کریں
   const { filteredResults = [], searchQuery = '' } = useSearch();
 
-  // ڈیفالٹ اوتار تصویر (امیج کریش پروٹیکشن کے لیے)
+  // ڈیفالٹ اوتار تصویر
   const defaultAvatar = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150';
 
-  // لائیو ایکشن ہینڈلرز (بٹنز ایکٹیویشن)
+  // 🎯 پروفائل اوپن کرنے کا ماسٹر ہینڈلر (جو ہوم پیج کو شفٹ کرے گا)
+  const handleProfileOpen = (profile) => {
+    if (!profile) return;
+    
+    // ۱۔ سب سے پہلے منتخب کردہ پروفائل کا ڈیٹا سیٹ کریں
+    if (setSelectedProfile) {
+      setSelectedProfile(profile);
+    }
+
+    // ۲۔ ایپ کے مرکزی برین (App.jsx) کو سگنل دیں کہ وہ پروفائل ویو پر سوئچ کر جائے
+    if (onAction) {
+      onAction('profile'); 
+    } else {
+      // اگر onAction دستیاب نہ ہو تو کسٹم ایونٹ کے ذریعے ٹیب سوئچ کریں
+      window.dispatchEvent(new CustomEvent('switch-tab', { detail: 'profile' }));
+    }
+  };
+
+  // لائیو لائک اور کنکٹ ہینڈلرز
   const handleLike = (e, profile) => {
     e.stopPropagation(); // سوائپر کلک ایونٹ کو روکنے کے لیے
     const name = profile?.displayName || profile?.name || t('user', 'صارف');
@@ -28,10 +46,6 @@ const Home = ({ setSelectedProfile }) => {
     e.stopPropagation();
     const name = profile?.displayName || profile?.name || t('user', 'صارف');
     alert(`${name} کو کنکشن کی درخواست کامیابی سے بھیج دی گئی ہے!`);
-  };
-
-  const handleExploreAll = () => {
-    alert("تمام معزز رشتے لوڈ کیے جا رہے ہیں...");
   };
 
   const isRTL = i18n.dir() === 'rtl';
@@ -67,7 +81,8 @@ const Home = ({ setSelectedProfile }) => {
                 key={p?.uid || p?.id || Math.random().toString()} 
                 className="rounded-[45px] bg-white shadow-2xl border-[6px] border-white overflow-hidden relative"
               >
-                <div className="relative h-full w-full cursor-pointer group" onClick={() => setSelectedProfile && setSelectedProfile(p)}>
+                {/* 🛠️ کلک پر اب handleProfileOpen رن ہوگا */}
+                <div className="relative h-full w-full cursor-pointer group" onClick={() => handleProfileOpen(p)}>
                   <img 
                     src={p?.photoURL || p?.img || defaultAvatar} 
                     alt={p?.displayName || p?.name} 
@@ -75,13 +90,13 @@ const Home = ({ setSelectedProfile }) => {
                     onError={(e) => { e.target.src = defaultAvatar; }}
                   />
                   
-                  {/* پسندیدہ (Heart) آئیکن - فلی ایکٹیو */}
+                  {/* پسندیدہ (Heart) آئیکن */}
                   <button 
                     type="button"
                     onClick={(e) => handleLike(e, p)}
                     className="absolute top-4 right-4 bg-white/30 backdrop-blur-md p-2 rounded-full border border-white/40 shadow-md active:scale-90 transition-all z-10"
                   >
-                    <Heart size={16} className="text-white fill-[#D4AF37] hover:scale-110 transition-transform" />
+                    <Heart size={16} className="text-white fill-[#D4AF37]" />
                   </button>
                   
                   {/* کارڈ انفارمیشن اوورلے */}
@@ -100,19 +115,19 @@ const Home = ({ setSelectedProfile }) => {
                       </div>
                     </div>
                     
-                    {/* کنٹرول ایکشن بٹنز - فلی ایکٹیو */}
+                    {/* کنٹرول ایکشن بٹنز */}
                     <div className="flex gap-2 mt-3">
                       <button 
                         type="button"
-                        onClick={(e) => { e.stopPropagation(); setSelectedProfile && setSelectedProfile(p); }}
-                        className="flex-1 bg-[#F5E6D3] text-[#4A0E0E] hover:bg-[#ebd2b5] py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-1"
+                        onClick={(e) => { e.stopPropagation(); handleProfileOpen(p); }}
+                        className="flex-1 bg-[#F5E6D3] text-[#4A0E0E] py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 flex items-center justify-center gap-1"
                       >
                         <User size={10} /> {t('view_profile', 'پروفائل')}
                       </button>
                       <button 
                         type="button"
                         onClick={(e) => handleConnect(e, p)}
-                        className="flex-1 bg-[#4A0E0E] text-[#D4AF37] hover:bg-[#380a0a] py-2 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg transition-all active:scale-95 flex items-center justify-center gap-1"
+                        className="flex-1 bg-[#4A0E0E] text-[#D4AF37] py-2 rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg transition-all active:scale-95 flex items-center justify-center gap-1"
                       >
                         <Send size={10} /> {t('connect', 'رابطہ')}
                       </button>
@@ -123,11 +138,9 @@ const Home = ({ setSelectedProfile }) => {
             ))}
           </Swiper>
         ) : (
-          /* 🔎 سرچ فال بیک */
           <div className="text-center py-20 text-gray-400 text-xs font-bold bg-white border border-gray-100 rounded-[45px] p-6 shadow-xl max-w-[260px] h-[380px] flex flex-col justify-center items-center">
-            <span className="text-3xl mb-3 animate-bounce">🔍</span>
+            <span className="text-3xl mb-3">🔍</span>
             <p className="text-[#4A0E0E] text-sm font-black">کوئی مماثلت نہیں ملی</p>
-            <p className="text-gray-400 text-[9px] mt-1">براہ کرم سرچ فلٹر تبدیل کر کے دوبارہ کوشش کریں۔</p>
           </div>
         )}
       </div>
@@ -138,8 +151,8 @@ const Home = ({ setSelectedProfile }) => {
           <h3 className="text-[#4A0E0E] font-black text-xs uppercase tracking-wider">{t('top_matches', 'معزز رشتے')}</h3>
           <button 
             type="button"
-            onClick={handleExploreAll}
-            className="text-[9px] font-black text-[#D4AF37] hover:text-[#4A0E0E] flex items-center gap-0.5 uppercase italic cursor-pointer transition-colors bg-transparent border-none"
+            onClick={() => alert("تمام معزز رشتے لوڈ کیے جا رہے ہیں...")}
+            className="text-[9px] font-black text-[#D4AF37] flex items-center gap-0.5 uppercase italic bg-transparent border-none"
           >
             {t('explore_all', 'سب دیکھیں')} <ChevronRight size={12} className={isRTL ? 'rotate-180' : ''} />
           </button>
@@ -150,10 +163,10 @@ const Home = ({ setSelectedProfile }) => {
             filteredResults.map((p) => (
               <div 
                 key={`scroll-${p?.uid || p?.id || Math.random().toString()}`} 
-                onClick={() => setSelectedProfile && setSelectedProfile(p)} 
+                onClick={() => handleProfileOpen(p)} 
                 className="flex flex-col items-center gap-1.5 flex-shrink-0 snap-start cursor-pointer transition-transform active:scale-95 group"
               >
-                <div className="relative p-0.5 rounded-full border-2 border-[#D4AF37] shadow-md bg-white transition-all group-hover:border-[#4A0E0E]">
+                <div className="relative p-0.5 rounded-full border-2 border-[#D4AF37] shadow-md bg-white">
                   <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-white relative">
                     <img 
                       src={p?.photoURL || p?.img || defaultAvatar} 
@@ -162,28 +175,26 @@ const Home = ({ setSelectedProfile }) => {
                       onError={(e) => { e.target.src = defaultAvatar; }}
                     />
                   </div>
-                  
-                  {/* گول تصویر کے اوپر ویریفائیڈ بیج */}
                   {(p?.verificationStatus === 'verified' || !p?.verificationStatus) && (
                     <div className="absolute bottom-0 right-0 transform translate-x-0.5 translate-y-0.5 scale-75">
                       <VerifiedBadge status={p?.verificationStatus || 'verified'} />
                     </div>
                   )}
                 </div>
-                <span className="text-[10px] font-black text-[#4A0E0E] tracking-tight group-hover:text-[#D4AF37] transition-colors">
+                <span className="text-[10px] font-black text-[#4A0E0E]">
                   {(p?.displayName || p?.name || t('user', 'صارف')).split(' ')[0]}
                 </span>
               </div>
             ))
           ) : (
-            <div className="text-gray-400 text-[10px] font-bold py-6 w-full text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-              تلاش کے مطابق کوئی معزز رشتہ دستیاب نہیں
+            <div className="text-gray-400 text-[10px] font-bold py-6 w-full text-center bg-gray-50 rounded-2xl">
+              کوئی معزز رشتہ دستیاب نہیں
             </div>
           )}
         </div>
       </div>
 
-      {/* ۳۔ ٹرسٹ بیجز (ٹرانسلیشن سپورٹ کے ساتھ) */}
+      {/* ۳۔ ٹرسٹ بیجز */}
       <div className="px-5 flex justify-between gap-2 mt-2">
          <TrustBadge label={t('verified_label', '100% تصدیق شدہ')} sub={t('verified_sub', 'شناختی کارڈ ویریفائیڈ')} />
          <TrustBadge label={t('privacy_label', 'محفوظ پرائیویسی')} sub={t('privacy_sub', 'ڈیٹا مکمل پوشیدہ')} />
@@ -193,7 +204,6 @@ const Home = ({ setSelectedProfile }) => {
   );
 };
 
-// ہیلپر ٹرسٹ بیج کمپوننٹ
 const TrustBadge = ({ label, sub }) => (
   <div className="flex flex-col items-center text-center flex-1 max-w-[115px] bg-white border border-gray-100/70 p-2.5 rounded-[22px] shadow-xs">
     <div className="bg-[#F5E6D3] p-2 rounded-xl mb-1.5 border border-[#D4AF37]/10">
