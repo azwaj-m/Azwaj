@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { AuthService } from '../services/AuthService';
 import { Phone, Lock, User, ShieldCheck, LogIn, UserPlus } from 'lucide-react';
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
 
 function Login({ onLoginSuccess }) {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -14,8 +16,9 @@ function Login({ onLoginSuccess }) {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    AuthService.setupRecaptcha("recaptcha-container");
     if (!isPasswordLogin) {
-      AuthService.setupRecaptcha('recaptcha-container');
+      window.recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", { size: "invisible" });
     }
   }, [isPasswordLogin]);
 
@@ -154,7 +157,7 @@ function Login({ onLoginSuccess }) {
                 type="tel"
                 placeholder="+923001234567"
                 value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
+                onChange={(value) => setPhoneNumber("+" + value)}
                 className="w-full bg-[#F5E6D3]/20 border border-[#D4AF37]/10 focus:border-[#D4AF37] text-[#4A0E0E] text-xs font-bold rounded-xl px-4 py-3.5 focus:outline-none transition-all text-left"
                 required
               />
@@ -188,7 +191,7 @@ function Login({ onLoginSuccess }) {
                   type="tel"
                   placeholder="+923001234567"
                   value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  onChange={(value) => setPhoneNumber("+" + value)}
                   className="w-full bg-[#F5E6D3]/20 border border-[#D4AF37]/10 focus:border-[#D4AF37] text-[#4A0E0E] text-xs font-bold rounded-xl px-4 py-3.5 focus:outline-none transition-all text-left"
                   required
                 />
@@ -294,7 +297,7 @@ function Login({ onLoginSuccess }) {
         {/* 🌐 گوگل پریمیم بٹن */}
         <button
           type="button"
-          onClick={handleGoogleLogin}
+          onClick={() => AuthService.loginWithGoogle().then(onLoginSuccess)}
           disabled={loading}
           className="w-full h-13 bg-[#FFFDF9] hover:bg-gray-50 text-[#4A0E0E] font-black text-xs rounded-xl flex items-center justify-center gap-2.5 transition-all active:scale-98 disabled:opacity-50 border border-gray-200 shadow-sm"
         >

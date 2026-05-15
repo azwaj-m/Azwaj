@@ -1,174 +1,112 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { AuthService } from "./services/AuthService";
 import { initialProfiles } from './utils/seedData';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
 import Sidebar from './components/Sidebar';
 import ProfileDetailModal from './components/ProfileDetailModal';
+import ProfileSettings from './components/ProfileSettings';
 
-// پیجز کی امپورٹ
+// Pages
 import Login from './pages/Login';
 import Home from './pages/Home';
 import Discover from './pages/Discover';
 import Chat from './pages/Chat';
 import Notifications from './pages/Notifications';
 import ProfileManager from './pages/ProfileManager';
-import Profile from './pages/Profile'; 
 import Subscription from './pages/Subscription';
-import PrivacySettings from './pages/PrivacySettings';
 import Verification from './pages/Verification';
 
 const App = () => {
-  const [user, setUser] = useState({ uid: 'u101', displayName: 'شاہ زیب خان' });
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('home');
-  const [currentView, setCurrentView] = useState('main'); 
+  const [currentView, setCurrentView] = useState('main');
   const [searchQuery, setSearchQuery] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
-  const [isPremium, setIsPremium] = useState(false);
 
-  // 📡 سائیڈ بار کے کسٹم ایونٹس کو سننے کی لائیو لاجک
+  // 🛡️ پاورفل آٹو ڈیٹیکٹر
   useEffect(() => {
-    const handleSwitchTab = (e) => {
-      if (e.detail) {
-        setActiveTab(e.detail);
-        setCurrentView('main');
-      }
-    };
-
-    const handleOpenPrivacy = () => {
-      setCurrentView('privacy_settings');
-    };
-
-    const handleOpenBlocked = () => {
-      setCurrentView('blocked');
-    };
-
-    window.addEventListener('switch-tab', handleSwitchTab);
-    window.addEventListener('open-privacy-settings', handleOpenPrivacy);
-    window.addEventListener('open-blocked-list', handleOpenBlocked);
-
-    return () => {
-      window.removeEventListener('switch-tab', handleSwitchTab);
-      window.removeEventListener('open-privacy-settings', handleOpenPrivacy);
-      window.removeEventListener('open-blocked-list', handleOpenBlocked);
-    };
+    console.log("🔍 DETECTOR: Initializing AZWAJ Core...");
+    const unsubscribe = AuthService?.observeAuthState((userData) => {
+      setUser(userData);
+      setAuthLoading(false);
+      console.log(userData ? "✅ DETECTOR: User Authenticated" : "ℹ️ DETECTOR: No Active Session");
+    });
+    return () => unsubscribe && unsubscribe();
   }, []);
 
   const filteredProfiles = useMemo(() => {
-    const profilesList = initialProfiles || [];
-    return profilesList.filter(p => {
-      if (!p || !p.fullName) return false;
-      const query = searchQuery.toLowerCase();
-      return (
-        p.fullName.toLowerCase().includes(query) ||
-        (p.city && p.city.toLowerCase().includes(query)) ||
-        (p.profession && p.profession.toLowerCase().includes(query))
-      );
-    });
+    const list = initialProfiles || [];
+    return list.filter(p => 
+      p?.fullName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p?.city?.toLowerCase().includes(searchQuery.toLowerCase())
+    );
   }, [searchQuery]);
 
   const handleSidebarAction = (view, subTab = null) => {
-    if (subTab) {
-      setActiveTab(subTab);
-    }
+    if (subTab) setActiveTab(subTab);
     setCurrentView(view);
     setIsSidebarOpen(false);
   };
 
+  // 🚨 فیز 1: لوڈنگ ڈیٹیکٹر
+  if (authLoading) {
+    return (
+      <div className="h-screen bg-[#1a0007] flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#D4AF37]"></div>
+        <p className="text-[#D4AF37] mt-4 font-black text-[10px] tracking-widest uppercase">Initializing Core...</p>
+      </div>
+    );
+  }
+
+  // 🚨 فیز 2: آتھ چیک
   if (!user) {
-    return <Login onLoginSuccess={(userData) => setUser(userData)} />;
+    return <Login onLoginSuccess={(data) => setUser(data)} />;
   }
 
   const renderContent = () => {
-    if (currentView === 'main') {
-      switch (activeTab) {
-        case 'home':
-          return <Home profiles={filteredProfiles} setSelectedProfile={setSelectedProfile} />;
-        case 'discover':
-          return <Discover profiles={filteredProfiles} setSelectedProfile={setSelectedProfile} />;
-        case 'chat':
-          return <Chat />;
-        case 'notifications':
-          return <Notifications setActiveTab={setActiveTab} setCurrentView={setCurrentView} />;
-        case 'profile':
-            return <ProfileManager onNavigate={(tab) => setActiveTab(tab)} setCurrentView={setCurrentView} />;
-          default:
-          return <Home profiles={filteredProfiles} setSelectedProfile={setSelectedProfile} />;
+    if (currentView !== 'main') {
+      switch(currentView) {
+        case 'privacy_settings': return <ProfileSettings onBack={() => setCurrentView('main')} />;
+        case 'verification': return <Verification onBack={() => setCurrentView('main')} />;
+        case 'premium': return <Subscription onUpgrade={() => setCurrentView('main')} onBack={() => setCurrentView('main')} />;
+        default: return <Home profiles={filteredProfiles} setSelectedProfile={setSelectedProfile} />;
       }
     }
 
-    if (currentView === 'privacy_settings') {
-      return <PrivacySettings onBack={() => setCurrentView('main')} />;
+    switch (activeTab) {
+      case 'home': return <Home profiles={filteredProfiles} setSelectedProfile={setSelectedProfile} />;
+      case 'discover': return <Discover profiles={filteredProfiles} setSelectedProfile={setSelectedProfile} />;
+      case 'chat': return <Chat />;
+      case 'notifications': return <Notifications setActiveTab={setActiveTab} setCurrentView={setCurrentView} />;
+      case 'profile': return <ProfileManager onNavigate={setActiveTab} setCurrentView={setCurrentView} />;
+      default: return <Home profiles={filteredProfiles} setSelectedProfile={setSelectedProfile} />;
     }
-
-    if (currentView === 'verification') {
-      return <Verification onBack={() => setCurrentView('main')} />;
-    }
-
-    if (currentView === 'blocked') {
-      return (
-        <div className="w-full min-h-screen bg-[#FFFDF9] p-10 flex flex-col items-center justify-center text-center">
-           <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center text-red-600 mb-4 border border-red-100">🚫</div>
-           <h2 className="text-[#4A0E0E] font-black mb-2 text-base">بلاک شدہ لسٹ مینیجر</h2>
-           <p className="text-gray-500 text-xs mb-6 font-bold">آپ نے فی الحال کسی بھی صارف کو بلاک نہیں کیا ہے۔</p>
-           <button type="button" onClick={() => setCurrentView('main')} className="bg-[#4A0E0E] text-[#D4AF37] px-6 py-2.5 rounded-xl font-black text-xs shadow-md">واپس جائیں</button>
-        </div>
-      );
-    }
-
-    if (currentView === 'premium') {
-      return <Subscription onUpgrade={() => { setIsPremium(true); setCurrentView('main'); }} />;
-    }
-
-    if (currentView === 'help') {
-      return (
-        <div className="w-full min-h-screen bg-[#FFFDF9] p-10 flex flex-col items-center justify-center text-center">
-           <div className="w-16 h-16 bg-[#F5E6D3]/40 rounded-2xl flex items-center justify-center text-[#4A0E0E] mb-4 border border-[#D4AF37]/20">❓</div>
-           <h2 className="text-[#4A0E0E] font-black mb-2 text-base">مدد اور آفیشل سپورٹ</h2>
-           <p className="text-gray-500 text-xs mb-6 font-bold">رشتوں کی تصدیق یا شکایات کے لیے ای میل کریں:</p>
-           <a href="mailto:support@azwaj.com" className="bg-[#4A0E0E] text-[#D4AF37] px-6 py-3 rounded-xl font-black text-xs shadow-md">support@azwaj.com</a>
-           <button type="button" onClick={() => setCurrentView('main')} className="text-[#4A0E0E] font-black text-xs underline mt-6">واپس جائیں</button>
-        </div>
-      );
-    }
-    return null;
   };
 
   return (
     <div className="max-w-md mx-auto h-screen bg-[#FFFDF9] flex flex-col overflow-hidden relative shadow-2xl">
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setIsSidebarOpen(false)}
-        onAction={handleSidebarAction}
-      />
-
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} onAction={handleSidebarAction} />
+      
       {selectedProfile && (
-        <ProfileDetailModal
-          profile={selectedProfile}
-          onClose={() => setSelectedProfile(null)}
-          onStartChat={() => { setActiveTab('chat'); setCurrentView('main'); setSelectedProfile(null); }}
+        <ProfileDetailModal 
+          profile={selectedProfile} 
+          onClose={() => setSelectedProfile(null)} 
+          onStartChat={() => { setActiveTab('chat'); setSelectedProfile(null); }} 
         />
       )}
 
       {currentView === 'main' && activeTab !== 'chat' && (
-        <Header
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          toggleSidebar={() => setIsSidebarOpen(true)}
-          onNotificationClick={() => {
-            setCurrentView('main');
-            setActiveTab('notifications');
-          }}
-        />
+        <Header searchQuery={searchQuery} setSearchQuery={setSearchQuery} toggleSidebar={() => setIsSidebarOpen(true)} />
       )}
 
-      <main className="flex-1 overflow-y-auto no-scrollbar">
+      <main className="flex-1 overflow-y-auto no-scrollbar pb-20">
         {renderContent()}
       </main>
 
-      {currentView === 'main' && (
-        <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
-      )}
+      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} setCurrentView={setCurrentView} />
     </div>
   );
 };

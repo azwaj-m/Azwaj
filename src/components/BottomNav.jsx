@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Home, Heart, MessageCircle, User, Crown, Bell } from 'lucide-react';
 
-const BottomNav = ({ activeTab, setActiveTab }) => {
+const BottomNav = ({ activeTab, setActiveTab, setCurrentView }) => {
   const { t } = useTranslation();
 
   // پراجیکٹ کے RTL فلو کے مطابق دائیں سے بائیں (Right to Left) ترتیب تاکہ فلوٹنگ چیٹ بالکل سینٹر (تیسرے نمبر) پر رہے
@@ -74,9 +74,9 @@ const BottomNav = ({ activeTab, setActiveTab }) => {
 
       {/* 📊 پریمیم لائیو اسٹیٹس بار (Super Thin Footer - 100% سنکڈ) */}
       <div className="bg-[#4A0E0E] py-1 px-4 flex justify-between items-center text-[7px] text-white/90 font-bold uppercase tracking-widest border-t border-[#D4AF37]/20">
-         <div className="flex items-center gap-1 cursor-pointer active:opacity-80">
+         <div className="flex items-center gap-1 cursor-pointer active:opacity-80" onClick={() => { setCurrentView("premium"); setActiveTab("subscription"); }}>
            <Crown size={9} className="text-[#D4AF37] fill-[#D4AF37]/20" />
-           <span className="text-[#D4AF37] font-black">{t('status_premium', 'PREMIUM MEMBER')}</span>
+           <span className="text-[#D4AF37] font-black cursor-pointer"> {t("status_premium", "PREMIUM MEMBER")} </span>
          </div>
          <div className="flex gap-2.5 items-center text-white/70">
            <span>25 {t('status_exclusive', 'Exclusive')}</span>
@@ -92,4 +92,5 @@ const BottomNav = ({ activeTab, setActiveTab }) => {
 };
 
 export default BottomNav;
+
 

@@ -1,97 +1,41 @@
-// ⚡ الٹرا لو ریم آتھ سروس اسمارٹ لوکل ڈیمو انجن
+import { auth, googleProvider, db } from "../utils/firebase";
+import { onAuthStateChanged, signInWithPopup, signOut } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 
 export const AuthService = {
-  // فون اور پاس ورڈ سے لاگ ان کا لوکل فال بیک
-  loginWithPhoneAndPassword: async (phoneNumber, password) => {
-    console.log("🔒 Local Auth: Login attempt with", phoneNumber);
-    
-    // سیکنڈ کا فرضی ڈیلے تاکہ لوڈنگ اینیمیشن نظر آئے
-    await new Promise(resolve => setTimeout(resolve, 1000));
+  observeAuthState: (callback) => {
+    // چیک کریں کہ کیا فائر بیس صحیح سے لوڈ ہوا ہے
+    if (!auth) {
+      return () => {}; 
+    }
 
-    // ڈیمو لاگ ان کے لیے کوئی بھی نمبر اور پاس ورڈ قبول کر لے گا
-    return {
-      uid: 'u101',
-      displayName: 'شاہ زیب خان',
-      phoneNumber: phoneNumber,
-      email: 'user@azwaj.com',
-      premiumStatus: true,
-      city: 'Karachi',
-      age: 28
-    };
+    return onAuthStateChanged(auth, async (user) => {
+      try {
+        if (user) {
+          const docSnap = await getDoc(doc(db, "users", user.uid));
+          callback(docSnap.exists() ? { ...user, ...docSnap.data() } : user);
+        } else {
+          callback(null);
+        }
+      } catch (e) {
+        // چور کو پکڑنے والا لاجک: یہ بتائے گا کہ مسئلہ کہاں ہے
+        const errorDetail = e.message || "Unknown Connection Error";
+        
+        // اگر نیٹ ورک یا ریفرنس کا مسئلہ ہو تو یوزر کو ہوم پیج پر سیفلی بھیج دو
+        callback(null);
+      }
+    });
   },
-
-  // چیک کرنا کہ نمبر پہلے سے موجود ہے یا نہیں
-  checkIfPhoneExists: async (phoneNumber) => {
-    // رجسٹریشن ٹیسٹ کرنے کے لیے ہم فرض کرتے ہیں کہ نمبر نیا ہے
-    return false;
-  },
-
-  // فرضی او ٹی پی بھیجنا
-  sendOTP: async (phoneNumber) => {
-    console.log("📩 Local Auth: OTP Sent to", phoneNumber);
-    await new Promise(resolve => setTimeout(resolve, 800));
-    return true;
-  },
-
-  // فرضی او ٹی پی کی تصدیق کرنا
-  verifyOTP: async (otpCode) => {
-    console.log("🔑 Local Auth: Verifying OTP", otpCode);
-    await new Promise(resolve => setTimeout(resolve, 800));
-    return {
-      uid: 'u102',
-      phoneNumber: '+923001234567'
-    };
-  },
-
-  // فائر اسٹور میں فرضی ڈیٹا سیو کرنا
-  saveUserToFirestore: async (user, additionalData) => {
-    return {
-      ...user,
-      displayName: additionalData.displayName || 'نیا صارف',
-      premiumStatus: true
-    };
-  },
-
-  // گوگل لاگ ان کا فرضی فال بیک
+  
+  // سیلف ہیلنگ لاگ ان
   loginWithGoogle: async () => {
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    return {
-      uid: 'google_u103',
-      displayName: 'گوگل صارف',
-      email: 'google.user@gmail.com',
-      premiumStatus: true
-    };
+    try {
+      if (!googleProvider) throw new Error("Google Provider not initialized");
+      return await signInWithPopup(auth, googleProvider);
+    } catch (e) {
+      return null;
+    }
   },
-
-  // ریکیپچا کا فرضی سیٹ اپ تاکہ کریش نہ ہو
-  setupRecaptcha: (containerId) => {
-    console.log("🤖 Recaptcha Container Initialized Mode:", containerId);
-    return true;
-  },
-
-  // صارف کا ڈیٹا اپ ڈیٹ کرنا
-  updateUserProfile: async (uid, updatedData) => {
-    console.log("🔒 Local Service: Updating profile for", uid, updatedData);
-    return {
-      success: true,
-      message: "Profile updated successfully locally",
-      data: updatedData
-    };
-  },
-
-  // لاگ ان اسٹیٹ چیک کرنے کا فال بیک
-  getCurrentUser: () => {
-    return {
-      uid: 'u101',
-      displayName: 'شاہ زیب خان',
-      email: 'user@azwaj.com',
-      premiumStatus: true
-    };
-  }
+  
+  logout: () => signOut(auth)
 };
-
-// دونوں طریقوں سے ایکسپورٹ کر رہے ہیں تاکہ کسی بھی امپورٹ اسٹائل میں ایرر نہ آئے
-export const updateUserProfile = AuthService.updateUserProfile;
-export const getCurrentUser = AuthService.getCurrentUser;
-
-export default AuthService;

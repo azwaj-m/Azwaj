@@ -141,7 +141,7 @@ const ProfileManager = ({ onNavigate, setCurrentView }) => {
               </div>
               <div>
                 <h4 className="font-black text-[#4A0E0E] text-xs">ممبرشپ پلان</h4>
-                <p className="text-[9px] font-bold text-amber-600 mt-0.5">لائف ٹائم رائل پاس ایکٹو ہے</p>
+                <button onClick={() => setCurrentView("subscription")} className="text-[9px] font-bold text-amber-600 mt-0.5">لائف ٹائم رائل پاس ایکٹو ہے</button>
               </div>
             </div>
           </div>
