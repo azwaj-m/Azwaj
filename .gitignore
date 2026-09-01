@@ -3,3 +3,4 @@ dist/
 .env
 .vercel/
 .git/
+.env.local
