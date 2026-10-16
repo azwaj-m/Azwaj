@@ -1,6 +1,39 @@
-node_modules/
-dist/
+# --- Dependencies & Node Modules ---
+**/node_modules/
+**/dist/
+**/build/
+.pnpm-store/
+
+# --- Build Artifacts & Android / Gradle ---
+**/.gradle/
+**/build.gradle.bak
+**/local.properties
+android-sdk/
+kali-arm64/
+kali-nethunter-rootfs-minimal-arm64.tar.xz
+*.apk
+*.aab
+*.dex
+*.class
+
+# --- Reverse Engineering / Jadx & Binaries ---
+**/jadx/
+bin/
+downloads/
+wifi/
+seeker/logs/
+seeker/__pycache__/
+
+# --- Environment & Configuration ---
 .env
-.vercel/
-.git/
 .env.local
+*.log
+*.sqlite
+*.db
+
+# --- System & Temporary Files ---
+.DS_Store
+Thumbs.db
+*.bak
+*.tmp
+*~
